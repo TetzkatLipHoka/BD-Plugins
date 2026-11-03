@@ -2,12 +2,12 @@
  * @name FullSearchContext
  * @author Ven, Aria (Vencord) · BD-Port
  * @version 1.0.1
- * @description Rechtsklick auf Suchergebnisse öffnet das vollständige Nachrichten-Kontextmenü (Antworten, Kopieren, Reaktionen, andere Plugins …) inkl. „Autor-ID kopieren“. Port des Vencord-Plugins.
+ * @description Right-clicking search results opens the full message context menu (reply, copy, reactions, other plugins …) including "Copy author ID". Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/fullSearchContext
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/FullSearchContext/FullSearchContext.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -232,21 +232,21 @@ module.exports = class FullSearchContext {
         this.__updater = new UpdateManager("FullSearchContext", BdApi.Plugins.get("FullSearchContext")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         this.ChannelStore = Webpack.getStore("ChannelStore");
-        // Normales Nachrichten-Kontextmenü (navId "message"), Modul mit ".MESSAGE,commandTargetId:"
+        // Regular message context menu (navId "message"), module containing ".MESSAGE,commandTargetId:"
         this.MessageMenu = Webpack.getModule(m => typeof m?.default === "function" && typeof m.c === "function"
             && String(m.c).includes(".MESSAGE,commandTargetId:"), { defaultExport: false })?.default;
         if (!this.MessageMenu) {
-            UI.showToast("FullSearchContext: Nachrichten-Menü nicht gefunden", { type: "error" });
+            UI.showToast("FullSearchContext: message menu not found", { type: "error" });
             return Logger.error("MessageMenu not found");
         }
 
         this.onContext = e => this.handle(e);
         document.addEventListener("contextmenu", this.onContext, true);
 
-        // „Autor-ID kopieren“ in unserem Menü ergänzen
+        // Add "Copy author ID" to our menu
         this.unpatches.push(ContextMenu.patch("message", (tree, props) => {
             if (!props?.__bdFullSearch || !props.message?.author) return;
-            const item = ContextMenu.buildItem({ id: "bd-copy-author-id", label: "Autor-ID kopieren", action: () => this.copy(props.message.author.id) });
+            const item = ContextMenu.buildItem({ id: "bd-copy-author-id", label: "Copy author ID", action: () => this.copy(props.message.author.id) });
             const c = tree?.props?.children;
             if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
         }));
@@ -261,7 +261,7 @@ module.exports = class FullSearchContext {
     copy(text) {
         if (window.DiscordNative?.clipboard?.copy) window.DiscordNative.clipboard.copy(text);
         else navigator.clipboard.writeText(text);
-        UI.showToast("Kopiert", { type: "success" });
+        UI.showToast("Copied", { type: "success" });
     }
 
     findMessage(el) {

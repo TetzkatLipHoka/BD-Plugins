@@ -2,6 +2,7 @@
 
 ### 1.0.3
 - Added auto-updater with changelog (UpdateManager by Pharaoh2k)
+- Translated all UI texts, settings and descriptions to English
 
 ### 1.0.2
 - Fixed settings-menu entry (Discord renamed the navId to settings-menu)

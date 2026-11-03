@@ -2,12 +2,12 @@
  * @name GitHubRepos
  * @author talhakf, Panniku, benjii (Equicord) · BD-Port (vereinfacht)
  * @version 1.0.1
- * @description Rechtsklick auf einen User mit verknüpftem GitHub → „GitHub-Repositories“ zeigt seine öffentlichen Repos (nach Sternen sortiert, mit Sprache und Beschreibung). Vereinfachter Port des Equicord-Plugins (Fenster statt Profil-Tab).
+ * @description Right-click a user with a linked GitHub account → "GitHub repositories" shows their public repos (sorted by stars, with language and description). Simplified port of the Equicord plugin (window instead of profile tab).
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/githubRepos
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/GitHubRepos/GitHubRepos.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Equicord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Equicord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -273,7 +273,7 @@ module.exports = class GitHubRepos {
             if (!user) return;
             const acc = ghAccount(this.UserProfileStore.getUserProfile(user.id));
             if (!acc) return;
-            const item = ContextMenu.buildItem({ id: "bd-gh-repos", label: "GitHub-Repositories", action: () => this.openModal(user, acc) });
+            const item = ContextMenu.buildItem({ id: "bd-gh-repos", label: "GitHub repositories", action: () => this.openModal(user, acc) });
             const c = tree?.props?.children;
             if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
         }));
@@ -294,14 +294,14 @@ module.exports = class GitHubRepos {
         for (const url of urls) {
             try {
                 const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
-                if (res.status === 403) throw new Error("GitHub-Rate-Limit erreicht (60 Anfragen/Stunde ohne Login) – später erneut versuchen.");
-                if (!res.ok) { lastErr = new Error(`GitHub antwortet mit ${res.status}`); continue; }
+                if (res.status === 403) throw new Error("GitHub rate limit reached (60 requests/hour without login) – try again later.");
+                if (!res.ok) { lastErr = new Error(`GitHub responded with ${res.status}`); continue; }
                 const data = await res.json();
                 this.cache.set(key, data);
                 return data;
             } catch (e) { lastErr = e; if (String(e.message).includes("Rate-Limit")) break; }
         }
-        throw lastErr ?? new Error("Unbekannter Fehler");
+        throw lastErr ?? new Error("Unknown error");
     }
 
     View = ({ plugin, user, acc }) => {
@@ -318,7 +318,7 @@ module.exports = class GitHubRepos {
                 .sort(sort === "stars" ? (a, b) => b.stargazers_count - a.stargazers_count : sort === "name" ? (a, b) => a.name.localeCompare(b.name) : (a, b) => new Date(b.pushed_at) - new Date(a.pushed_at));
         }, [repos, q, sort]);
 
-        const sortLabel = { stars: "★ Sterne", name: "A–Z", pushed: "Zuletzt aktiv" };
+        const sortLabel = { stars: "★ Stars", name: "A–Z", pushed: "Recently pushed" };
         const nextSort = { stars: "name", name: "pushed", pushed: "stars" };
         const owner = repos?.[0]?.owner;
 
@@ -326,13 +326,13 @@ module.exports = class GitHubRepos {
             React.createElement("div", { className: "bd-gh-head" },
                 owner?.avatar_url && React.createElement("img", { src: owner.avatar_url }),
                 React.createElement("a", { href: `https://github.com/${acc.name}`, target: "_blank", rel: "noreferrer" }, "github.com/" + acc.name),
-                repos && React.createElement("span", { style: { color: "var(--text-muted)" } }, `· ${repos.length} Repos geladen`)),
+                repos && React.createElement("span", { style: { color: "var(--text-muted)" } }, `· ${repos.length} repos loaded`)),
             React.createElement("div", { className: "bd-gh-tools" },
-                React.createElement("input", { className: "bd-gh-search", placeholder: "Name, Beschreibung oder Sprache …", value: q, onChange: e => setQ(e.target.value) }),
+                React.createElement("input", { className: "bd-gh-search", placeholder: "Name, description or language …", value: q, onChange: e => setQ(e.target.value) }),
                 React.createElement("button", { className: "bd-gh-sort", onClick: () => setSort(nextSort[sort]) }, sortLabel[sort])),
-            err ? React.createElement("div", { className: "bd-gh-msg" }, "Fehler: " + err)
-                : !repos ? React.createElement("div", { className: "bd-gh-msg" }, "Lade Repositories …")
-                    : !shown.length ? React.createElement("div", { className: "bd-gh-msg" }, "Keine öffentlichen Repositories gefunden.")
+            err ? React.createElement("div", { className: "bd-gh-msg" }, "Error: " + err)
+                : !repos ? React.createElement("div", { className: "bd-gh-msg" }, "Loading repositories …")
+                    : !shown.length ? React.createElement("div", { className: "bd-gh-msg" }, "No public repositories found.")
                         : React.createElement("div", { className: "bd-gh-list" }, shown.map(r =>
                             React.createElement("div", { className: "bd-gh-card", key: r.id, onClick: () => window.open(r.html_url, "_blank") },
                                 React.createElement("div", null, React.createElement("span", { className: "bd-gh-name" }, r.name), r.fork && React.createElement("span", { className: "bd-gh-fork" }, "Fork")),
@@ -340,20 +340,20 @@ module.exports = class GitHubRepos {
                                 React.createElement("div", { className: "bd-gh-meta" },
                                     r.language && React.createElement("span", null, React.createElement("span", { className: "bd-gh-dot", style: { background: LANG_COLORS[r.language] ?? "#8b949e" } }), r.language),
                                     React.createElement("span", null, "★ " + r.stargazers_count.toLocaleString()),
-                                    r.pushed_at && React.createElement("span", null, "aktualisiert " + new Date(r.pushed_at).toLocaleDateString()))))));
+                                    r.pushed_at && React.createElement("span", null, "updated " + new Date(r.pushed_at).toLocaleDateString()))))));
     };
 
     openModal(user, acc) {
         UI.showConfirmationModal(`GitHub – ${user.globalName ?? user.global_name ?? user.username}`,
-            React.createElement(this.View, { plugin: this, user, acc }), { confirmText: "Schließen", cancelText: null });
+            React.createElement(this.View, { plugin: this, user, acc }), { confirmText: "Close", cancelText: null });
     }
 
     getSettingsPanel() {
         const s = this.s;
         return UI.buildSettingsPanel({
             settings: [
-                { type: "slider", id: "perPage", name: "Anzahl geladener Repos", note: "Maximal 100 (eine GitHub-Anfrage)", min: 10, max: 100, step: 10, value: s.perPage, markers: [10, 30, 50, 100] },
-                { type: "switch", id: "hideForks", name: "Forks ausblenden", value: s.hideForks }
+                { type: "slider", id: "perPage", name: "Number of repos to load", note: "Max. 100 (one GitHub request)", min: 10, max: 100, step: 10, value: s.perPage, markers: [10, 30, 50, 100] },
+                { type: "switch", id: "hideForks", name: "Hide forks", value: s.hideForks }
             ],
             onChange: (_c, id, v) => { Data.save("settings", { ...this.s, [id]: v }); this.cache.clear(); }
         });

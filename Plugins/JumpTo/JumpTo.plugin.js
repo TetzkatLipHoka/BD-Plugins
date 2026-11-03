@@ -2,12 +2,12 @@
  * @name JumpTo
  * @author Samwich, thororen (Equicord) · BD-Port
  * @version 1.0.1
- * @description Kontextmenü: zur ersten/letzten Nachricht eines Kanals/DMs springen, bzw. zur ersten/letzten Nachricht eines Users im Kanal. Port des Equicord-Plugins.
+ * @description Context menu: jump to the first/last message of a channel/DM, or to a user's first/last message in the channel. Port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/jumpTo
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/JumpTo/JumpTo.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord/Equicord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord/Equicord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -239,7 +239,7 @@ module.exports = class JumpTo {
         this.transitionTo = Webpack.getModule(Filters.byStrings("transitionTo - Transitioning to"), { searchExports: true });
 
         if (!this.RestAPI || !this.transitionTo) {
-            UI.showToast("JumpTo: benötigte Discord-Module nicht gefunden", { type: "error" });
+            UI.showToast("JumpTo: required Discord modules not found", { type: "error" });
             Logger.error("Missing modules", { RestAPI: !!this.RestAPI, transitionTo: !!this.transitionTo });
             return;
         }
@@ -267,7 +267,7 @@ module.exports = class JumpTo {
             const res = await this.RestAPI.get({ url: `/channels/${channelId}/messages`, query: { limit: 1 } });
             const id = res.body?.[0]?.id;
             if (id) this.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}/${id}`);
-        } catch (e) { Logger.error(e); UI.showToast("Letzte Nachricht konnte nicht geladen werden.", { type: "error" }); }
+        } catch (e) { Logger.error(e); UI.showToast("Could not load the last message.", { type: "error" }); }
     }
 
     async jumpUser(channelId, guildId, userId, first) {
@@ -277,15 +277,15 @@ module.exports = class JumpTo {
                 query: { author_id: userId, channel_id: channelId, sort_by: "timestamp", sort_order: first ? "asc" : "desc" }
             });
             const id = res.body?.messages?.[0]?.[0]?.id;
-            if (!id) return UI.showToast("Keine Nachrichten dieses Users in diesem Kanal.", { type: "error" });
+            if (!id) return UI.showToast("No messages from this user in this channel.", { type: "error" });
             this.transitionTo(`/channels/${guildId}/${channelId}/${id}`);
-        } catch (e) { Logger.error(e); UI.showToast("Suche fehlgeschlagen.", { type: "error" }); }
+        } catch (e) { Logger.error(e); UI.showToast("Search failed.", { type: "error" }); }
     }
 
     channelItems(c) {
         return [
-            { id: "jt-first", label: "Zur ersten Nachricht springen", action: () => this.jumpFirst(c.id, c.guild_id) },
-            { id: "jt-last", label: "Zur letzten Nachricht springen", action: () => this.jumpLast(c.id, c.guild_id) }
+            { id: "jt-first", label: "Jump to first message", action: () => this.jumpFirst(c.id, c.guild_id) },
+            { id: "jt-last", label: "Jump to last message", action: () => this.jumpLast(c.id, c.guild_id) }
         ];
     }
 
@@ -308,8 +308,8 @@ module.exports = class JumpTo {
         const guildId = this.SelectedGuildStore.getGuildId();
         if (!channelId || !guildId) return;
         this.push(tree, [
-            { id: "jt-first-user", label: "Zur ersten Nachricht dieses Users", action: () => this.jumpUser(channelId, guildId, message.author.id, true) },
-            { id: "jt-last-user", label: "Zur letzten Nachricht dieses Users", action: () => this.jumpUser(channelId, guildId, message.author.id, false) }
+            { id: "jt-first-user", label: "Jump to this user's first message", action: () => this.jumpUser(channelId, guildId, message.author.id, true) },
+            { id: "jt-last-user", label: "Jump to this user's last message", action: () => this.jumpUser(channelId, guildId, message.author.id, false) }
         ]);
     }
 };

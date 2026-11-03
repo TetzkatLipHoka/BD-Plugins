@@ -2,12 +2,12 @@
  * @name VoiceChatUtilities
  * @author D3SOX, nickwoah (Equicord) · BD-Port
  * @version 1.0.1
- * @description Aktionen für einen ganzen Voice-Kanal per Rechtsklick: alle erwähnen, trennen, (un)muten, (un)deafen, verschieben. Port des Equicord-Plugins.
+ * @description Actions for a whole voice channel via right-click: mention, disconnect, (un)mute, (un)deafen or move everyone. Port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/voiceChatUtils
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/VoiceChatUtilities/VoiceChatUtilities.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord/Equicord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord/Equicord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -243,7 +243,7 @@ module.exports = class VoiceChatUtilities {
         this.ComponentDispatch = Webpack.getModule(Filters.byKeys("dispatchToLastSubscribed", "emitter"), { searchExports: true });
 
         if (!this.VoiceStateStore || !this.RestAPI) {
-            UI.showToast("VoiceChatUtilities: benötigte Discord-Module nicht gefunden", { type: "error" });
+            UI.showToast("VoiceChatUtilities: required Discord modules not found", { type: "error" });
             Logger.error("Missing modules", { VoiceStateStore: !!this.VoiceStateStore, RestAPI: !!this.RestAPI });
             return;
         }
@@ -268,7 +268,7 @@ module.exports = class VoiceChatUtilities {
         const tasks = Object.values(this.getStates(channel.id))
             .filter(s => includeSelf || s.userId !== myId)
             .map(s => () => this.RestAPI.patch({ url: `/guilds/${channel.guild_id}/members/${s.userId}`, body }));
-        this.runSequential(tasks).then(() => UI.showToast(`Voice Tools: ${tasks.length} Aktion(en) ausgeführt`, { type: "success" }));
+        this.runSequential(tasks).then(() => UI.showToast(`Voice Tools: ${tasks.length} action(s) done`, { type: "success" }));
     }
 
     mentionAll(channel) {
@@ -289,14 +289,14 @@ module.exports = class VoiceChatUtilities {
         const item = ContextMenu.buildItem({
             type: "submenu", id: "voice-tools", label: "Voice Tools",
             items: [
-                { id: "vt-mention", label: "Alle erwähnen", action: () => this.mentionAll(channel) },
-                { id: "vt-disconnect", label: "Alle trennen", danger: true, action: () => this.sendPatch(channel, { channel_id: null }) },
-                { id: "vt-mute", label: "Alle muten", action: () => this.sendPatch(channel, { mute: true }) },
-                { id: "vt-unmute", label: "Alle entmuten", action: () => this.sendPatch(channel, { mute: false }) },
-                { id: "vt-deafen", label: "Alle deafen", action: () => this.sendPatch(channel, { deaf: true }) },
-                { id: "vt-undeafen", label: "Alle undeafen", action: () => this.sendPatch(channel, { deaf: false }) },
+                { id: "vt-mention", label: "Mention all", action: () => this.mentionAll(channel) },
+                { id: "vt-disconnect", label: "Disconnect all", danger: true, action: () => this.sendPatch(channel, { channel_id: null }) },
+                { id: "vt-mute", label: "Mute all", action: () => this.sendPatch(channel, { mute: true }) },
+                { id: "vt-unmute", label: "Unmute all", action: () => this.sendPatch(channel, { mute: false }) },
+                { id: "vt-deafen", label: "Deafen all", action: () => this.sendPatch(channel, { deaf: true }) },
+                { id: "vt-undeafen", label: "Undeafen all", action: () => this.sendPatch(channel, { deaf: false }) },
                 {
-                    type: "submenu", id: "vt-move", label: "Alle verschieben nach…",
+                    type: "submenu", id: "vt-move", label: "Move all to…",
                     items: others.map(c => ({ id: `vt-move-${c.id}`, label: c.name, action: () => this.sendPatch(channel, { channel_id: c.id }, true) }))
                 }
             ]
@@ -311,8 +311,8 @@ module.exports = class VoiceChatUtilities {
         const s = this.settings;
         return UI.buildSettingsPanel({
             settings: [
-                { type: "slider", id: "waitAfter", name: "Aktionen bis zur Pause", note: "Gegen Rate-Limits", min: 1, max: 20, step: 1, value: s.waitAfter },
-                { type: "slider", id: "waitSeconds", name: "Pause (Sekunden)", min: 1, max: 10, step: 0.5, value: s.waitSeconds }
+                { type: "slider", id: "waitAfter", name: "Actions before pausing", note: "Avoids rate limits", min: 1, max: 20, step: 1, value: s.waitAfter },
+                { type: "slider", id: "waitSeconds", name: "Pause (seconds)", min: 1, max: 10, step: 0.5, value: s.waitSeconds }
             ],
             onChange: (_cat, id, value) => Data.save("settings", { ...this.settings, [id]: value })
         });

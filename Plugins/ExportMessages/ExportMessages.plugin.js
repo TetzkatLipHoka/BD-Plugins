@@ -2,12 +2,12 @@
  * @name ExportMessages
  * @author veygax, dat_insanity (Equicord) · BD-Port
  * @version 1.0.1
- * @description Rechtsklick auf eine Nachricht → als .txt exportieren. In den Plugin-Einstellungen: Kontaktliste (Freunde, Blockiert, Anfragen) als JSON in die Zwischenablage. Port des Equicord-Plugins.
+ * @description Right-click a message → export it as .txt. Plugin settings: copy your contact list (friends, blocked, requests) to the clipboard as JSON. Port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/exportMessages
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/ExportMessages/ExportMessages.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Equicord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Equicord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -264,7 +264,7 @@ module.exports = class ExportMessages {
         this.UserStore = Webpack.getStore("UserStore");
         this.unpatches.push(ContextMenu.patch("message", (tree, { message }) => {
             if (!message) return;
-            const item = ContextMenu.buildItem({ id: "bd-export-message", label: "Nachricht exportieren", action: () => this.exportMessage(message) });
+            const item = ContextMenu.buildItem({ id: "bd-export-message", label: "Export message", action: () => this.exportMessage(message) });
             const c = tree?.props?.children;
             if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
         }));
@@ -282,7 +282,7 @@ module.exports = class ExportMessages {
             if (fm?.saveWithDialog) {
                 const result = await fm.saveWithDialog(new TextEncoder().encode(content), filename);
                 if (result && this.settings.openFileAfterExport) fm.showItemInFolder?.(result);
-                if (result) UI.showToast(`Exportiert: ${filename}`, { type: "success" });
+                if (result) UI.showToast(`Exported: ${filename}`, { type: "success" });
             } else {
                 const a = document.createElement("a");
                 a.href = URL.createObjectURL(new Blob([content], { type: "text/plain" }));
@@ -291,7 +291,7 @@ module.exports = class ExportMessages {
             }
         } catch (e) {
             Logger.error(e);
-            UI.showToast("Export fehlgeschlagen", { type: "error" });
+            UI.showToast("Export failed", { type: "error" });
         }
     }
 
@@ -319,15 +319,15 @@ module.exports = class ExportMessages {
             const text = JSON.stringify(list, null, 2);
             if (window.DiscordNative?.clipboard?.copy) window.DiscordNative.clipboard.copy(text);
             else navigator.clipboard.writeText(text);
-            UI.showToast(`Kontakte kopiert (${list.friendsAdded.length} Freunde, ${list.blockedUsers.length} blockiert)`, { type: "success" });
-        } catch (e) { Logger.error(e); UI.showToast("Kontakte konnten nicht gelesen werden", { type: "error" }); }
+            UI.showToast(`Contacts copied (${list.friendsAdded.length} friends, ${list.blockedUsers.length} blocked)`, { type: "success" });
+        } catch (e) { Logger.error(e); UI.showToast("Could not read contacts", { type: "error" }); }
     }
 
     getSettingsPanel() {
         const s = this.settings;
         const panel = UI.buildSettingsPanel({
             settings: [
-                { type: "switch", id: "openFileAfterExport", name: "Datei nach dem Export im Explorer zeigen", value: s.openFileAfterExport }
+                { type: "switch", id: "openFileAfterExport", name: "Show the file in Explorer after exporting", value: s.openFileAfterExport }
             ],
             onChange: (_c, id, v) => Data.save("settings", { ...this.settings, [id]: v })
         });
@@ -336,6 +336,6 @@ module.exports = class ExportMessages {
             React.createElement("button", {
                 onClick: () => this.copyContacts(),
                 style: { marginTop: 16, background: "var(--brand-500, #5865f2)", color: "#fff", border: 0, borderRadius: 4, padding: "8px 14px", fontWeight: 500, cursor: "pointer" }
-            }, "Kontaktliste in Zwischenablage kopieren"));
+            }, "Copy contact list to clipboard"));
     }
 };

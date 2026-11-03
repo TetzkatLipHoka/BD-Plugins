@@ -6,8 +6,6 @@ A collection of **18 plugins** ported from [Equicord](https://github.com/Equicor
 
 Every plugin is a single self-contained `.plugin.js` file: no ZeresPluginLibrary, no BDFDB, no other dependencies. Every plugin also **updates itself** from this repository.
 
-> **Note:** The in-app texts (menu entries, settings, toasts) are currently **German**. English translations are planned.
-
 > Tested on **BetterDiscord 1.14.4**, Discord Stable **1.0.9266** (Chrome 152 / Electron 44), Windows, November 2026.
 > Discord changes its internals all the time, so a client update can break individual plugins.
 

@@ -2,6 +2,7 @@
 
 ### 1.0.4
 - Added auto-updater with changelog (UpdateManager by Pharaoh2k)
+- Translated all UI texts, settings and descriptions to English
 
 ### 1.0.3
 - Improved: removed debug logging

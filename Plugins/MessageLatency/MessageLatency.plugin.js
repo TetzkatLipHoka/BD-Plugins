@@ -2,12 +2,12 @@
  * @name MessageLatency
  * @author arHSM (Vencord) · BD-Port
  * @version 1.0.1
- * @description Zeigt ein Symbol an Nachrichten, deren Versand ≥ n Sekunden gedauert hat (oder deren Absender eine falsche Uhr hat). Port des Vencord-Plugins.
+ * @description Shows an indicator on messages that took ≥ n seconds to send (or whose sender's clock is off). Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/messageLatency
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/MessageLatency/MessageLatency.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -235,9 +235,9 @@ function snowflakeTime(id) {
 
 function stringDelta(delta, showMillis) {
     const diff = {
-        Tage: Math.floor(delta / 86400000),
-        Std: Math.floor(delta / 3600000 % 24),
-        Min: Math.floor(delta / 60000 % 60),
+        d: Math.floor(delta / 86400000),
+        h: Math.floor(delta / 3600000 % 24),
+        min: Math.floor(delta / 60000 % 60),
         s: Math.floor(delta / 1000 % 60),
         ms: Math.floor(delta % 1000)
     };
@@ -252,10 +252,10 @@ module.exports = class MessageLatency {
         this.__updater = new UpdateManager("MessageLatency", BdApi.Plugins.get("MessageLatency")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         this.UserStore = Webpack.getStore("UserStore");
-        // Nachrichten-Header (memo), enthält GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY = AeYyL+
+        // Message header (memo), contains GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY = AeYyL+
         this.Header = Webpack.getModule(m => m?.type && String(m.type).includes("AeYyL+") && String(m.type).includes("usernameSpanId"), { searchExports: true });
         if (!this.Header) {
-            UI.showToast("MessageLatency: Nachrichten-Header nicht gefunden", { type: "error" });
+            UI.showToast("MessageLatency: message header not found", { type: "error" });
             return Logger.error("Header not found");
         }
         const self = this;
@@ -263,9 +263,9 @@ module.exports = class MessageLatency {
             const d = self.data(message);
             if (!d) return null;
             const text = !d.delta
-                ? "Absender nutzt vermutlich einen alten Discord-Android-Client"
-                : (d.ahead ? `Die Uhr dieses Users geht ${d.delta} vor.` : `Diese Nachricht wurde mit ${d.delta} Verzögerung gesendet.`)
-                  + (d.kotlin ? " Vermutlich alter Discord-Android-Client." : "");
+                ? "Sender is probably on an old Discord Android client"
+                : (d.ahead ? `This user's clock is ${d.delta} ahead.` : `This message was sent with a delay of ${d.delta}.`)
+                  + (d.kotlin ? " Probably an old Discord Android client." : "");
             return React.createElement(Components.Tooltip, { text, position: "top" },
                 props => self.icon(d.fill, props));
         };
@@ -319,10 +319,10 @@ module.exports = class MessageLatency {
         const s = this.settings;
         return UI.buildSettingsPanel({
             settings: [
-                { type: "number", id: "latency", name: "Schwelle in Sekunden", value: s.latency, min: 0 },
-                { type: "switch", id: "detectDiscordKotlin", name: "Alte Discord-Android-Clients erkennen", value: s.detectDiscordKotlin },
-                { type: "switch", id: "showMillis", name: "Millisekunden anzeigen", value: s.showMillis },
-                { type: "switch", id: "ignoreSelf", name: "Eigene Nachrichten ignorieren", value: s.ignoreSelf }
+                { type: "number", id: "latency", name: "Threshold in seconds", value: s.latency, min: 0 },
+                { type: "switch", id: "detectDiscordKotlin", name: "Detect old Discord Android clients", value: s.detectDiscordKotlin },
+                { type: "switch", id: "showMillis", name: "Show milliseconds", value: s.showMillis },
+                { type: "switch", id: "ignoreSelf", name: "Ignore your own messages", value: s.ignoreSelf }
             ],
             onChange: (_c, id, v) => Data.save("settings", { ...this.settings, [id]: v })
         });

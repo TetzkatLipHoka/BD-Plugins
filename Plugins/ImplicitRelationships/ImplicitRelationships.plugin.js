@@ -2,12 +2,12 @@
  * @name ImplicitRelationships
  * @author Dolfies (Vencord) · BD-Port (vereinfacht)
  * @version 1.0.2
- * @description Zeigt deine „impliziten Beziehungen“: Leute, mit denen du laut Discord viel zu tun hast, die aber nicht in deiner Freundesliste sind – sortiert nach Kontakt-Rang. Öffnen per Rechtsklick aufs Zahnrad unten links oder in den Plugin-Einstellungen. Vereinfachter Port des Vencord-Plugins (eigenes Fenster statt eigener Freundes-Kategorie).
+ * @description Shows your "implicit relationships": people Discord thinks you interact with a lot who aren't on your friends list, ranked by affinity. Open via right-click on the settings cog bottom-left, or in the plugin settings. Simplified port of the Vencord plugin (own window instead of a friends-list tab).
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/implicitRelationships
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/ImplicitRelationships/ImplicitRelationships.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -258,15 +258,15 @@ module.exports = class ImplicitRelationships {
         this.openProfileModal = Webpack.getModule(Filters.byStrings('type:"USER_PROFILE_MODAL_OPEN"'), { searchExports: true });
         this.PrivateChannelActions = Webpack.getModule(Filters.byKeys("openPrivateChannel"));
         if (!this.Affinities) {
-            UI.showToast("ImplicitRelationships: Affinitäten-Store nicht gefunden", { type: "error" });
+            UI.showToast("ImplicitRelationships: affinities store not found", { type: "error" });
             return Logger.error("UserAffinities store missing");
         }
         const cogPatch = tree => {
-            const item = ContextMenu.buildItem({ id: "bd-ir-open", label: "Implizite Beziehungen", action: () => this.openModal() });
+            const item = ContextMenu.buildItem({ id: "bd-ir-open", label: "Implicit relationships", action: () => this.openModal() });
             const c = tree?.props?.children;
             if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
         };
-        // Zahnrad unten links: aktuell "settings-menu", früher "user-settings-cog"
+        // Settings cog bottom-left: currently "settings-menu", formerly "user-settings-cog"
         for (const nav of ["settings-menu", "user-settings-cog"]) this.unpatches.push(ContextMenu.patch(nav, cogPatch));
     }
 
@@ -294,23 +294,23 @@ module.exports = class ImplicitRelationships {
         }, [q, all]);
         const unknown = all.filter(a => !plugin.UserStore.getUser(a.otherUserId)).length;
         return React.createElement("div", { className: "bd-ir-wrap" },
-            React.createElement("input", { className: "bd-ir-search", placeholder: "Suchen …", value: q, autoFocus: true, onChange: e => setQ(e.target.value) }),
+            React.createElement("input", { className: "bd-ir-search", placeholder: "Search …", value: q, autoFocus: true, onChange: e => setQ(e.target.value) }),
             React.createElement("div", { className: "bd-ir-note" },
-                `${all.length} Personen ohne Freundschaft, sortiert nach Kontakt-Rang (1 = am meisten).`
-                + (unknown ? ` ${unknown} davon sind lokal nicht geladen und erscheinen nur mit ID.` : "")),
+                `${all.length} people who aren't your friends, sorted by affinity rank (1 = most).`
+                + (unknown ? ` ${unknown} of them aren't cached locally and are shown by ID only.` : "")),
             React.createElement("div", { className: "bd-ir-list" }, rows.map(({ a, user }) =>
                 React.createElement("div", { className: "bd-ir-row", key: a.otherUserId },
                     React.createElement("span", { className: "bd-ir-rank" }, a.communicationRank ?? "–"),
                     React.createElement("img", { src: user?.getAvatarURL?.(null, 32) ?? "https://cdn.discordapp.com/embed/avatars/0.png" }),
                     React.createElement("div", { className: "bd-ir-name" },
-                        user ? (user.globalName ?? user.global_name ?? user.username) : "Nicht geladen",
+                        user ? (user.globalName ?? user.global_name ?? user.username) : "Not cached",
                         React.createElement("small", null, user ? `@${user.username} · ${a.otherUserId}` : a.otherUserId)),
-                    React.createElement("button", { className: "bd-ir-btn", onClick: () => plugin.openProfile(a.otherUserId) }, "Profil"),
+                    React.createElement("button", { className: "bd-ir-btn", onClick: () => plugin.openProfile(a.otherUserId) }, "Profile"),
                     plugin.PrivateChannelActions && React.createElement("button", { className: "bd-ir-btn", onClick: () => plugin.PrivateChannelActions.openPrivateChannel(a.otherUserId) }, "DM")))));
     };
 
     openModal() {
-        UI.showConfirmationModal("Implizite Beziehungen", React.createElement(this.List, { plugin: this }), { confirmText: "Schließen", cancelText: null });
+        UI.showConfirmationModal("Implicit relationships", React.createElement(this.List, { plugin: this }), { confirmText: "Close", cancelText: null });
     }
 
     getSettingsPanel() { return React.createElement(this.List, { plugin: this }); }

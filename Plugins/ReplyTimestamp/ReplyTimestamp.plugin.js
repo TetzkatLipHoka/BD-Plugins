@@ -2,12 +2,12 @@
  * @name ReplyTimestamp
  * @author Kyuuhachi (Vencord) · BD-Port
  * @version 1.0.1
- * @description Zeigt einen Zeitstempel an Antwort-Vorschauen (Reply). Port des Vencord-Plugins.
+ * @description Shows a timestamp on reply previews. Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/replyTimestamp
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/ReplyTimestamp/ReplyTimestamp.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -258,10 +258,10 @@ module.exports = class ReplyTimestamp {
         this.__updater = new UpdateManager("ReplyTimestamp", BdApi.Plugins.get("ReplyTimestamp")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         DOM.addStyle(CSS);
-        // Komponente mit dem "Nachricht konnte nicht geladen werden"-Text (REPLY_QUOTE_MESSAGE_NOT_LOADED = 1i+hMi)
+        // Component with the "message could not be loaded" text (REPLY_QUOTE_MESSAGE_NOT_LOADED = 1i+hMi)
         const [mod, key] = Webpack.getWithKey(Filters.byStrings("1i+hMi", "isReplySpineClickable")) ?? [];
         if (!mod) {
-            UI.showToast("ReplyTimestamp: Reply-Komponente nicht gefunden", { type: "error" });
+            UI.showToast("ReplyTimestamp: reply component not found", { type: "error" });
             return Logger.error("Reply component not found");
         }
         Patcher.after(mod, key, (_, [props], ret) => {
@@ -270,7 +270,7 @@ module.exports = class ReplyTimestamp {
                 if (rm?.state !== 0 || !rm.message) return; // 0 = LOADED
                 const children = ret?.props?.children;
                 if (!Array.isArray(children)) return;
-                // Vencord fügt direkt hinter dem Spine-Element ein (vor Avatar, Name, Text)
+                // Vencord inserts right after the spine element (before avatar, name, text)
                 children.splice(1, 0, React.createElement(ReplyTs, { key: "bd-reply-ts", referenced: rm.message, base: props.baseMessage }));
             } catch (e) { Logger.error(e); }
         });

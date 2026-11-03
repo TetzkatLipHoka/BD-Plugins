@@ -2,12 +2,12 @@
  * @name MoreQuickReactions
  * @author Equicord/Vencord-Team · BD-Port (vereinfacht)
  * @version 1.0.4
- * @description Mehr Schnellreaktionen oben im Nachrichten-Kontextmenü (statt fest 4), in mehreren Zeilen, optional aus den „häufig benutzt“-Emojis statt den Favoriten. Vereinfachter Port des Vencord-Plugins (ohne Scrollen und ohne Hover-Leiste).
+ * @description More quick reactions at the top of the message context menu (instead of a fixed 4), in multiple rows, optionally from your frequently used emojis instead of favorites. Simplified port of the Vencord plugin (no scrolling, hover bar unchanged).
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/moreQuickReactions
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/MoreQuickReactions/MoreQuickReactions.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -242,14 +242,14 @@ module.exports = class MoreQuickReactions {
         const [mod, key] = found ?? [];
         this.key = key;
         if (!mod || !key) {
-            UI.showToast("MoreQuickReactions: Emoji-Hook nicht gefunden", { type: "error" });
+            UI.showToast("MoreQuickReactions: emoji hook not found", { type: "error" });
             return Logger.error("Hook not found");
         }
-        Logger.info("Hook gefunden");
+        Logger.info("Hook found");
         this.calls = 0;
 
         const plugin = this;
-        // Array, dessen filter()-Ergebnis sich nicht unter das eingestellte Limit kürzen lässt
+        // Array whose filter() result can't be truncated below the configured limit
         function makeArr(len) {
             const arr = new Array(len);
             return new Proxy(arr, {
@@ -279,7 +279,7 @@ module.exports = class MoreQuickReactions {
                 return out;
             } catch (e) { Logger.error(e); return ret; }
         });
-        // Zusätzlich direkt an der Datenquelle (Prototyp des Emoji-Kontexts), falls das Menü den Hook-Export nicht nutzt
+        // Also patch the data source directly (emoji context prototype), in case the menu doesn't use the hook export
         try {
             const ctx = this.EmojiStore?.getDisambiguatedEmojiContext?.(null);
             const proto = ctx && Object.getPrototypeOf(ctx);
@@ -299,8 +299,8 @@ module.exports = class MoreQuickReactions {
                         return out;
                     } catch (e) { Logger.error(e); return ret; }
                 });
-                Logger.info("Datenquelle gepatcht");
-            } else Logger.warn("Emoji-Kontext nicht gefunden");
+                Logger.info("Data source patched");
+            } else Logger.warn("Emoji context not found");
         } catch (e) { Logger.error(e); }
         this.applyCss();
     }
@@ -324,9 +324,9 @@ module.exports = class MoreQuickReactions {
         const r = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
         return UI.buildSettingsPanel({
             settings: [
-                { type: "slider", id: "reactionCount", name: "Anzahl Schnellreaktionen", note: "Discord-Standard: 4", min: 4, max: 30, step: 1, value: s.reactionCount, markers: [4, 10, 15, 20, 25, 30] },
-                { type: "slider", id: "columns", name: "Spalten", min: 3, max: 10, step: 1, value: s.columns, markers: r(3, 10) },
-                { type: "switch", id: "frequentEmojis", name: "Häufig benutzte statt Favoriten", note: "Füllt die Liste mit deinen meistgenutzten Reaktionen", value: s.frequentEmojis }
+                { type: "slider", id: "reactionCount", name: "Number of quick reactions", note: "Discord default: 4", min: 4, max: 30, step: 1, value: s.reactionCount, markers: [4, 10, 15, 20, 25, 30] },
+                { type: "slider", id: "columns", name: "Columns", min: 3, max: 10, step: 1, value: s.columns, markers: r(3, 10) },
+                { type: "switch", id: "frequentEmojis", name: "Frequently used instead of favorites", note: "Fills the list with your most used reactions", value: s.frequentEmojis }
             ],
             onChange: (_c, id, v) => { Data.save("settings", { ...this.s, [id]: v }); if (id === "columns") this.applyCss(); }
         });

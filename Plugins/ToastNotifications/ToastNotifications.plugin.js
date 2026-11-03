@@ -2,12 +2,12 @@
  * @name ToastNotifications
  * @author Skully, Ethan, Buzzy (Equicord) · BD-Port
  * @version 1.0.1
- * @description Zeigt eingehende Nachrichten als Toast-Popup in Discord – konfigurierbar für DMs, Gruppen, Freunde und Server-Kanäle. Linksklick springt hin, Rechtsklick markiert als gelesen. Port des Equicord-Plugins.
+ * @description Shows incoming messages as in-app toast pop-ups – configurable for DMs, groups, friends and server channels. Left-click jumps there, right-click marks as read. Port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/toastNotifications
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/ToastNotifications/ToastNotifications.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Equicord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Equicord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -244,7 +244,7 @@ const DEFAULTS = {
     notifyFor: ""
 };
 
-// UserNotificationSetting: 0 = ALL_MESSAGES, 1 = ONLY_MENTIONS, 2 = NO_MESSAGES, 3 = NULL (erben)
+// UserNotificationSetting: 0 = ALL_MESSAGES, 1 = ONLY_MENTIONS, 2 = NO_MESSAGES, 3 = NULL (inherit)
 const NOTIFY = { ALL: 0, MENTIONS: 1, NONE: 2 };
 
 const CSS = `
@@ -328,10 +328,10 @@ module.exports = class ToastNotifications {
         this.createRoot = ReactDOM?.createRoot ?? Webpack.getModule(Filters.byKeys("createRoot"))?.createRoot;
 
         if (!this.Dispatcher || !this.createRoot) {
-            UI.showToast("ToastNotifications: Dispatcher/ReactDOM nicht gefunden", { type: "error" });
+            UI.showToast("ToastNotifications: Dispatcher/ReactDOM not found", { type: "error" });
             return Logger.error("Missing", { Dispatcher: !!this.Dispatcher, createRoot: !!this.createRoot });
         }
-        if (!this.MessageComponent) Logger.warn("MessageComponent nicht gefunden – nutze einfache Darstellung");
+        if (!this.MessageComponent) Logger.warn("MessageComponent not found – using simple rendering");
 
         this.onMessage = e => { try { this.handleMessage(e); } catch (err) { Logger.error(err); } };
         this.Dispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
@@ -346,7 +346,7 @@ module.exports = class ToastNotifications {
         DOM.removeStyle();
     }
 
-    // ---------- Filterlogik (wie im Original) ----------
+    // ---------- Filter logic (same as the original) ----------
     handleMessage({ message, optimistic }) {
         if (optimistic || !message?.author) return;
         const channel = this.ChannelStore.getChannel(message.channel_id);
@@ -439,7 +439,7 @@ module.exports = class ToastNotifications {
             const g = this.GuildStore.getGuild(channel.guild_id);
             const icon = g?.icon ? this.IconUtils?.getGuildIconURL?.({ id: g.id, icon: g.icon, size: 32 }) : null;
             return React.createElement("div", { className: `${P}header` }, icon && React.createElement("img", { src: icon }),
-                React.createElement("span", { className: `${P}header-name` }, g?.name ?? "Unbekannter Server",
+                React.createElement("span", { className: `${P}header-name` }, g?.name ?? "Unknown server",
                     channel.name && React.createElement(React.Fragment, null,
                         React.createElement("span", { className: `${P}sep` }, " › "),
                         React.createElement("span", { className: `${P}chan` }, "#" + channel.name))));
@@ -450,7 +450,7 @@ module.exports = class ToastNotifications {
     fallbackMessage(message) {
         const u = message.author;
         const avatar = u?.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=64` : null;
-        const text = (message.content || (message.attachments?.length ? "📎 Anhang" : message.embeds?.length ? "🔗 Embed" : "")).slice(0, 500);
+        const text = (message.content || (message.attachments?.length ? "📎 Attachment" : message.embeds?.length ? "🔗 Embed" : "")).slice(0, 500);
         return React.createElement("div", { className: `${P}fallback` },
             avatar && React.createElement("img", { src: avatar }),
             React.createElement("div", null, React.createElement("b", null, u?.global_name ?? u?.globalName ?? u?.username),
@@ -498,7 +498,7 @@ module.exports = class ToastNotifications {
             onMouseEnter: () => setHover(true), onMouseLeave: () => setHover(false)
         },
         React.createElement("span", {
-            className: `${P}close`, role: "button", title: "Schließen",
+            className: `${P}close`, role: "button", title: "Close",
             onClick: e => { e.preventDefault(); e.stopPropagation(); onClose(); }
         }, React.createElement("svg", { viewBox: "0 0 24 24" }, React.createElement("path", { fill: "currentColor", d: "M18.4 4 12 10.4 5.6 4 4 5.6 10.4 12 4 18.4 5.6 20 12 13.6 18.4 20 20 18.4 13.6 12 20 5.6z" }))),
         content,
@@ -507,7 +507,7 @@ module.exports = class ToastNotifications {
 
     showExample() {
         const me = this.UserStore.getCurrentUser();
-        this.show({ title: "Beispiel-Benachrichtigung", body: "So sieht ein Toast aus!", icon: this.IconUtils?.getUserAvatarURL?.(me) });
+        this.show({ title: "Example notification", body: "This is what a toast looks like!", icon: this.IconUtils?.getUserAvatarURL?.(me) });
     }
 
     getSettingsPanel() {
@@ -516,22 +516,22 @@ module.exports = class ToastNotifications {
         return UI.buildSettingsPanel({
             settings: [
                 { type: "dropdown", id: "position", name: "Position", value: s.position, options: [
-                    { label: "Unten links", value: "bottom-left" }, { label: "Oben links", value: "top-left" },
-                    { label: "Oben rechts", value: "top-right" }, { label: "Unten rechts", value: "bottom-right" }] },
-                { type: "slider", id: "timeout", name: "Anzeigedauer (Sekunden)", value: s.timeout, min: 1, max: 15, step: 1, markers: range(1, 15) },
-                { type: "slider", id: "opacity", name: "Deckkraft (%)", value: s.opacity, min: 10, max: 100, step: 10, markers: range(10, 100, 10) },
-                { type: "slider", id: "maxNotifications", name: "Maximal gleichzeitig", value: s.maxNotifications, min: 1, max: 5, step: 1, markers: range(1, 5) },
-                { type: "switch", id: "disableInStreamerMode", name: "Im Streamer-Modus ausblenden", value: s.disableInStreamerMode },
-                { type: "switch", id: "respectDoNotDisturb", name: "Bei „Nicht stören“ ausblenden", value: s.respectDoNotDisturb },
-                { type: "switch", id: "directMessages", name: "Direktnachrichten", value: s.directMessages },
-                { type: "switch", id: "groupMessages", name: "Gruppen-DMs", value: s.groupMessages },
-                { type: "switch", id: "friendServerNotifications", name: "Freunde in Servern", note: "Auch wenn der Kanal sonst nicht benachrichtigt", value: s.friendServerNotifications },
-                { type: "text", id: "ignoreUsers", name: "Ignorierte User-IDs", note: "Kommagetrennt", value: s.ignoreUsers, placeholder: "000000000000000000, 111111111111111111" },
-                { type: "text", id: "notifyFor", name: "Kanal-IDs immer benachrichtigen", note: "Kommagetrennt", value: s.notifyFor, placeholder: "000000000000000000, 111111111111111111" },
-                { type: "custom", id: "example", name: "Vorschau", children: React.createElement("button", {
+                    { label: "Bottom left", value: "bottom-left" }, { label: "Top left", value: "top-left" },
+                    { label: "Top right", value: "top-right" }, { label: "Bottom right", value: "bottom-right" }] },
+                { type: "slider", id: "timeout", name: "Display time (seconds)", value: s.timeout, min: 1, max: 15, step: 1, markers: range(1, 15) },
+                { type: "slider", id: "opacity", name: "Opacity (%)", value: s.opacity, min: 10, max: 100, step: 10, markers: range(10, 100, 10) },
+                { type: "slider", id: "maxNotifications", name: "Max. at once", value: s.maxNotifications, min: 1, max: 5, step: 1, markers: range(1, 5) },
+                { type: "switch", id: "disableInStreamerMode", name: "Hide in Streamer Mode", value: s.disableInStreamerMode },
+                { type: "switch", id: "respectDoNotDisturb", name: "Hide while on Do Not Disturb", value: s.respectDoNotDisturb },
+                { type: "switch", id: "directMessages", name: "Direct messages", value: s.directMessages },
+                { type: "switch", id: "groupMessages", name: "Group DMs", value: s.groupMessages },
+                { type: "switch", id: "friendServerNotifications", name: "Friends in servers", note: "Even if the channel wouldn't notify otherwise", value: s.friendServerNotifications },
+                { type: "text", id: "ignoreUsers", name: "Ignored user IDs", note: "Comma-separated", value: s.ignoreUsers, placeholder: "000000000000000000, 111111111111111111" },
+                { type: "text", id: "notifyFor", name: "Always notify for channel IDs", note: "Comma-separated", value: s.notifyFor, placeholder: "000000000000000000, 111111111111111111" },
+                { type: "custom", id: "example", name: "Preview", children: React.createElement("button", {
                     onClick: () => this.showExample(),
                     style: { background: "var(--brand-500, #5865f2)", color: "#fff", border: 0, borderRadius: 4, padding: "8px 14px", fontWeight: 500, cursor: "pointer" }
-                }, "Beispiel anzeigen") }
+                }, "Show example") }
             ],
             onChange: (_c, id, v) => {
                 this.set(id, v);

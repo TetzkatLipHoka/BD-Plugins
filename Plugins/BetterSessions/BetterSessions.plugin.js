@@ -2,12 +2,12 @@
  * @name BetterSessions
  * @author amia (Vencord) · BD-Port (vereinfacht)
  * @version 1.0.2
- * @description Prüft im Hintergrund auf neue Anmeldungen (Geräte/Sitzungen) und meldet sie. Eigene Übersicht mit genauen Zeitstempeln und eigenen Namen pro Sitzung (Rechtsklick aufs Zahnrad unten links → „Sitzungen“). Vereinfachter Port des Vencord-Plugins (eigenes Fenster statt Umbau der Geräte-Seite).
+ * @description Checks for new logins (devices/sessions) in the background and notifies you. Own overview with exact timestamps and custom names per session (right-click the settings cog bottom-left → "Sessions"). Simplified port of the Vencord plugin (own window instead of modifying the Devices page).
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterSessions
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/BetterSessions/BetterSessions.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -249,7 +249,7 @@ module.exports = class BetterSessions {
     constructor() { this.unpatches = []; }
     get s() { return Object.assign({}, DEFAULTS, Data.load("settings")); }
 
-    // gespeicherte Sitzungen pro Account: { [id_hash]: { name, isNew } }
+    // saved sessions per account: { [id_hash]: { name, isNew } }
     key() { return "sessions_" + (this.UserStore.getCurrentUser()?.id ?? "x"); }
     loadSaved() { return Data.load(this.key()) ?? {}; }
     saveSaved(v) { Data.save(this.key(), v); }
@@ -260,17 +260,17 @@ module.exports = class BetterSessions {
         DOM.addStyle(CSS);
         this.UserStore = Webpack.getStore("UserStore");
         this.RestAPI = Webpack.getModule(m => typeof m === "object" && m.del && m.put && m.get, { searchExports: true });
-        if (!this.RestAPI) { UI.showToast("BetterSessions: RestAPI nicht gefunden", { type: "error" }); return; }
+        if (!this.RestAPI) { UI.showToast("BetterSessions: RestAPI not found", { type: "error" }); return; }
 
         const cogPatch = tree => {
-            const item = ContextMenu.buildItem({ id: "bd-bs-open", label: "Sitzungen", action: () => this.openModal() });
+            const item = ContextMenu.buildItem({ id: "bd-bs-open", label: "Sessions", action: () => this.openModal() });
             const c = tree?.props?.children;
             if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
         };
-        // Zahnrad unten links: aktuell "settings-menu", früher "user-settings-cog"
+        // Settings cog bottom-left: currently "settings-menu", formerly "user-settings-cog"
         for (const nav of ["settings-menu", "user-settings-cog"]) this.unpatches.push(ContextMenu.patch(nav, cogPatch));
 
-        // Erster Lauf: bekannte Sitzungen still übernehmen (keine Meldungsflut beim ersten Start)
+        // First run: silently adopt known sessions (no notification flood on first start)
         this.check(Object.keys(this.loadSaved()).length === 0);
         if (this.s.backgroundCheck) this.timer = setInterval(() => this.check(false), Math.max(1, this.s.checkInterval) * 60000);
     }
@@ -292,24 +292,24 @@ module.exports = class BetterSessions {
                 saved[s.id_hash] = { name: "", isNew: !silent };
                 if (!silent) {
                     const ci = s.client_info ?? {};
-                    const text = `Neue Sitzung: ${ci.os ?? "?"} · ${ci.platform ?? "?"} · ${ci.location ?? "?"}`;
+                    const text = `New session: ${ci.os ?? "?"} · ${ci.platform ?? "?"} · ${ci.location ?? "?"}`;
                     if (UI.showNotification) UI.showNotification({ title: "BetterSessions", content: text, type: "warning", duration: Infinity });
                     else UI.showToast(text, { type: "warning", timeout: 15000 });
                 }
             }
-            // entfernte Sitzungen aufräumen
+            // clean up removed sessions
             const live = new Set(sessions.map(s => s.id_hash));
             if (sessions.length) for (const h of Object.keys(saved)) if (!live.has(h)) delete saved[h];
             this.saveSaved(saved);
             return sessions;
-        } catch (e) { Logger.error("Sitzungsprüfung fehlgeschlagen", e); return null; }
+        } catch (e) { Logger.error("Session check failed", e); return null; }
     }
 
     View = ({ plugin }) => {
         const [sessions, setSessions] = useState(null);
         const [saved, setSaved] = useState(() => plugin.loadSaved());
         useEffect(() => { plugin.check(false).then(s => { setSessions(s ?? []); setSaved(plugin.loadSaved()); }); }, []);
-        useEffect(() => () => { // beim Schließen „NEU“ zurücksetzen
+        useEffect(() => () => { // reset "NEW" on close
             const v = plugin.loadSaved(); for (const k in v) v[k].isNew = false; plugin.saveSaved(v);
         }, []);
 
@@ -317,8 +317,8 @@ module.exports = class BetterSessions {
             const v = { ...plugin.loadSaved() }; v[hash] = { ...(v[hash] ?? { isNew: false }), name }; plugin.saveSaved(v); setSaved(v);
         };
 
-        if (!sessions) return React.createElement("div", { className: "bd-bs-msg" }, "Lade Sitzungen …");
-        if (!sessions.length) return React.createElement("div", { className: "bd-bs-msg" }, "Keine Sitzungen gefunden.");
+        if (!sessions) return React.createElement("div", { className: "bd-bs-msg" }, "Loading sessions …");
+        if (!sessions.length) return React.createElement("div", { className: "bd-bs-msg" }, "No sessions found.");
 
         return React.createElement("div", { className: "bd-bs-wrap" }, sessions
             .slice().sort((a, b) => new Date(b.approx_last_used_time) - new Date(a.approx_last_used_time))
@@ -331,11 +331,11 @@ module.exports = class BetterSessions {
                     React.createElement("div", { className: "bd-bs-main" },
                         React.createElement("div", { className: "bd-bs-title" },
                             info.name ? `${info.name}*` : `${ci.os ?? "?"} · ${ci.platform ?? "?"}`,
-                            info.isNew && React.createElement("span", { className: "bd-bs-new" }, "NEU")),
+                            info.isNew && React.createElement("span", { className: "bd-bs-new" }, "NEW")),
                         React.createElement("div", { className: "bd-bs-sub" },
-                            `${ci.location ?? "unbekannter Ort"} · zuletzt aktiv ${last ? last.toLocaleString() : "?"}`)),
+                            `${ci.location ?? "unknown location"} · last active ${last ? last.toLocaleString() : "?"}`)),
                     React.createElement("input", {
-                        className: "bd-bs-input", placeholder: "Eigener Name …", defaultValue: info.name ?? "",
+                        className: "bd-bs-input", placeholder: "Custom name …", defaultValue: info.name ?? "",
                         onBlur: e => rename(s.id_hash, e.target.value.trim()),
                         onKeyDown: e => { if (e.key === "Enter") e.target.blur(); }
                     }));
@@ -343,15 +343,15 @@ module.exports = class BetterSessions {
     };
 
     openModal() {
-        UI.showConfirmationModal("Sitzungen", React.createElement(this.View, { plugin: this }), { confirmText: "Schließen", cancelText: null });
+        UI.showConfirmationModal("Sessions", React.createElement(this.View, { plugin: this }), { confirmText: "Close", cancelText: null });
     }
 
     getSettingsPanel() {
         const s = this.s;
         return UI.buildSettingsPanel({
             settings: [
-                { type: "switch", id: "backgroundCheck", name: "Im Hintergrund auf neue Sitzungen prüfen", note: "Änderung wirkt nach Plugin-Neustart", value: s.backgroundCheck },
-                { type: "number", id: "checkInterval", name: "Prüfintervall (Minuten)", min: 1, value: s.checkInterval }
+                { type: "switch", id: "backgroundCheck", name: "Check for new sessions in the background", note: "Takes effect after restarting the plugin", value: s.backgroundCheck },
+                { type: "number", id: "checkInterval", name: "Check interval (minutes)", min: 1, value: s.checkInterval }
             ],
             onChange: (_c, id, v) => Data.save("settings", { ...this.s, [id]: v })
         });

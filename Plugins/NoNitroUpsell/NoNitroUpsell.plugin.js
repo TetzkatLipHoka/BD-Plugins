@@ -2,12 +2,12 @@
  * @name NoNitroUpsell
  * @author thororen (Equicord) · BD-Port
  * @version 1.0.1
- * @description Entfernt Nitro-Werbung, indem der Client lokal glaubt, du hättest Nitro. Port des Equicord-Plugins. Kann sich mit YABDP4Nitro überschneiden.
+ * @description Removes Nitro upsells by making the client locally believe you have Nitro. Port of the Equicord plugin. May overlap with YABDP4Nitro.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/noNitroUpsell
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/NoNitroUpsell/NoNitroUpsell.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord/Equicord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord/Equicord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -235,7 +235,7 @@ module.exports = class NoNitroUpsell {
         this.Store = Webpack.getStore("OverridePremiumTypeStore");
         this.Dispatcher = Webpack.getModule(Filters.byKeys("dispatch", "subscribe"), { searchExports: true });
         if (!this.Store?.getState) {
-            UI.showToast("NoNitroUpsell: OverridePremiumTypeStore nicht gefunden", { type: "error" });
+            UI.showToast("NoNitroUpsell: OverridePremiumTypeStore not found", { type: "error" });
             Logger.error("OverridePremiumTypeStore missing");
             return;
         }

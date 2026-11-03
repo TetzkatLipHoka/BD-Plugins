@@ -2,12 +2,12 @@
  * @name UnlockedAvatarZoom
  * @author nakoyasha (Vencord) · BD-Port
  * @version 1.0.2
- * @description Erlaubt im Zuschneide-Tool (Avatar/Banner ändern) stärkeres Hineinzoomen. Port des Vencord-Plugins.
+ * @description Allows zooming in further in the image crop tool (avatar/banner). Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/unlockedAvatarZoom
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/UnlockedAvatarZoom/UnlockedAvatarZoom.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -232,7 +232,7 @@ module.exports = class UnlockedAvatarZoom {
         this.__updater = new UpdateManager("UnlockedAvatarZoom", BdApi.Plugins.get("UnlockedAvatarZoom")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         this.abort = new AbortController();
-        // Zuschneide-Dialog (AVATAR_UPLOAD_EDIT_MEDIA = DxAYCF) wird lazy geladen
+        // Crop dialog (AVATAR_UPLOAD_EDIT_MEDIA = DxAYCF) is lazy-loaded
         const filter = m => typeof m?.default === "function" && String(m.default).includes("DxAYCF");
         const existing = Webpack.getModule(filter, { defaultExport: false });
         if (existing) this.patch(existing);
@@ -245,7 +245,7 @@ module.exports = class UnlockedAvatarZoom {
     patch(mod) {
         Patcher.after(mod, "default", (_, __, ret) => {
             try {
-                // Zoom-Slider: minValue 1, maxValue 2, keyboardStep .025
+                // Zoom slider: minValue 1, maxValue 2, keyboardStep .025
                 const slider = Utils.findInTree(ret,
                     n => n?.props?.maxValue === 2 && n.props.minValue === 1 && n.props.keyboardStep === 0.025,
                     { walkable: ["props", "children"] });
@@ -256,7 +256,7 @@ module.exports = class UnlockedAvatarZoom {
 
     getSettingsPanel() {
         return UI.buildSettingsPanel({
-            settings: [{ type: "slider", id: "zoomMultiplier", name: "Maximaler Zoom", note: "Discord-Standard ist 2", min: 2, max: 16, step: 1, value: this.multiplier }],
+            settings: [{ type: "slider", id: "zoomMultiplier", name: "Maximum zoom", note: "Discord default is 2", min: 2, max: 16, step: 1, value: this.multiplier }],
             onChange: (_c, id, v) => Data.save(id, v)
         });
     }

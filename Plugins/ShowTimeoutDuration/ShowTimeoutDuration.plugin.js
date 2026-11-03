@@ -2,12 +2,12 @@
  * @name ShowTimeoutDuration
  * @author Ven, Sqaaakoi (Vencord) · BD-Port
  * @version 1.0.1
- * @description Zeigt, wie lange der Timeout eines Users noch dauert – im Tooltip oder direkt neben dem Timeout-Symbol. Port des Vencord-Plugins.
+ * @description Shows how much longer a user's timeout lasts – in the tooltip or right next to the timeout icon. Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/showTimeoutDuration
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/ShowTimeoutDuration/ShowTimeoutDuration.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -230,7 +230,7 @@ const CSS = `.bd-std-inline { color: var(--text-feedback-critical, var(--status-
 function fmt(ms) {
     if (ms <= 0) return "0 s";
     const s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60, sec = s % 60;
-    return [d && `${d} T`, h && `${h} Std`, m && `${m} Min`, !d && `${sec} s`].filter(Boolean).join(" ");
+    return [d && `${d}d`, h && `${h}h`, m && `${m}m`, !d && `${sec}s`].filter(Boolean).join(" ");
 }
 
 function Countdown({ until }) {
@@ -250,7 +250,7 @@ module.exports = class ShowTimeoutDuration {
         this.GuildMemberStore = Webpack.getStore("GuildMemberStore");
         this.Header = Webpack.getModule(m => m?.type && String(m.type).includes("AeYyL+") && String(m.type).includes("usernameSpanId"), { searchExports: true });
         if (!this.Header) {
-            UI.showToast("ShowTimeoutDuration: Nachrichten-Header nicht gefunden", { type: "error" });
+            UI.showToast("ShowTimeoutDuration: message header not found", { type: "error" });
             return Logger.error("Header not found");
         }
 
@@ -259,7 +259,7 @@ module.exports = class ShowTimeoutDuration {
                 const message = props?.message;
                 const kids = ret?.props?.username?.props?.children;
                 if (!message || !Array.isArray(kids)) return;
-                // Das Timeout-Tooltip-Element erkennen (Tooltip mit text + children)
+                // Find the timeout tooltip element (tooltip with text + children)
                 const idx = kids.findIndex(k => k && k.props && "text" in k.props && k.props.children && !k.props.message);
                 if (idx < 0) return;
                 const guildId = this.ChannelStore.getChannel(message.channel_id)?.guild_id;
@@ -269,10 +269,10 @@ module.exports = class ShowTimeoutDuration {
                 const tip = kids[idx];
                 const origText = tip.props.text;
                 tip.props.text = React.createElement(React.Fragment, null,
-                    origText, React.createElement("br"), "Noch ", React.createElement(Countdown, { until }));
+                    origText, React.createElement("br"), "Remaining: ", React.createElement(Countdown, { until }));
                 if (this.mode === "inline") {
                     kids[idx] = React.createElement(React.Fragment, { key: "bd-std" },
-                        tip, React.createElement("span", { className: "bd-std-inline" }, React.createElement(Countdown, { until }), " Timeout"));
+                        tip, React.createElement("span", { className: "bd-std-inline" }, React.createElement(Countdown, { until }), " timeout"));
                 }
             } catch (e) { Logger.error(e); }
         });
@@ -284,8 +284,8 @@ module.exports = class ShowTimeoutDuration {
     getSettingsPanel() {
         return UI.buildSettingsPanel({
             settings: [{
-                type: "dropdown", id: "displayStyle", name: "Anzeige der Restdauer", value: this.mode,
-                options: [{ label: "Neben dem Timeout-Symbol", value: "inline" }, { label: "Nur im Tooltip", value: "tooltip" }]
+                type: "dropdown", id: "displayStyle", name: "Remaining time display", value: this.mode,
+                options: [{ label: "Next to the timeout icon", value: "inline" }, { label: "Tooltip only", value: "tooltip" }]
             }],
             onChange: (_c, id, v) => Data.save(id, v)
         });

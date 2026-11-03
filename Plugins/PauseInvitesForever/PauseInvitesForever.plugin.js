@@ -2,12 +2,12 @@
  * @name PauseInvitesForever
  * @author Dolfies, amia (Vencord) · BD-Port
  * @version 1.0.2
- * @description Bringt im „Einladungen pausieren“-Dialog die Option zurück, Einladungen unbegrenzt zu pausieren. Port des Vencord-Plugins.
+ * @description Brings back the option to pause invites indefinitely in the "Pause invites" dialog. Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/pauseInvitesForever
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/PauseInvitesForever/PauseInvitesForever.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -242,7 +242,7 @@ module.exports = class PauseInvitesForever {
         this.RestAPI = Webpack.getModule(m => typeof m === "object" && m.del && m.put && m.patch, { searchExports: true });
         this.abort = new AbortController();
 
-        // Dialog-Modul (GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION = qPJkZh) wird lazy geladen
+        // Dialog module (GUILD_INVITE_DISABLE_ACTION_SHEET_DESCRIPTION = qPJkZh) is lazy-loaded
         const filter = m => typeof m?.default === "function" && String(m.default).includes("qPJkZh");
         const existing = Webpack.getModule(filter, { defaultExport: false });
         if (existing) this.patch(existing);
@@ -265,11 +265,11 @@ module.exports = class PauseInvitesForever {
         const features = [...new Set([...(guild?.features ?? []), "INVITES_DISABLED"])];
         try {
             await this.RestAPI.patch({ url: `/guilds/${guildId}`, body: { features } });
-            UI.showToast("Einladungen dauerhaft pausiert", { type: "success" });
+            UI.showToast("Invites paused indefinitely", { type: "success" });
             onClose?.();
         } catch (e) {
             Logger.error(e);
-            UI.showToast("Pausieren fehlgeschlagen: " + (e?.body?.message ?? e?.message ?? "unbekannt"), { type: "error" });
+            UI.showToast("Pausing failed: " + (e?.body?.message ?? e?.message ?? "unknown"), { type: "error" });
         }
     }
 
@@ -278,12 +278,12 @@ module.exports = class PauseInvitesForever {
             try {
                 const guild = this.GuildStore.getGuild(props?.guildId);
                 if (!this.canPause(guild)) return;
-                const body = ret?.props?.children;            // <div className=…> mit Auswahl + Schaltern
+                const body = ret?.props?.children;            // <div className=…> with select + switches
                 const list = body?.props?.children;
                 if (!Array.isArray(list)) return;
                 list.push(React.createElement("div", { className: "bd-pif-row", key: "bd-pif" },
-                    React.createElement("span", null, "Ohne Ablaufdatum pausieren (bis du sie wieder aktivierst)"),
-                    React.createElement("button", { className: "bd-pif-btn", onClick: () => this.pauseForever(props.guildId, props.onClose) }, "Unbegrenzt pausieren")
+                    React.createElement("span", null, "Pause without an end date (until you re-enable them)"),
+                    React.createElement("button", { className: "bd-pif-btn", onClick: () => this.pauseForever(props.guildId, props.onClose) }, "Pause indefinitely")
                 ));
             } catch (e) { Logger.error(e); }
         });

@@ -2,12 +2,12 @@
  * @name BiggerStreamPreview
  * @author phil (Vencord) · BD-Port
  * @version 1.0.1
- * @description Rechtsklick auf einen streamenden User oder Stream → „Stream-Vorschau ansehen“ in groß. Port des Vencord-Plugins.
+ * @description Right-click a streaming user or a stream → "View stream preview" in a large modal. Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/biggerStreamPreview
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/BiggerStreamPreview/BiggerStreamPreview.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -237,7 +237,7 @@ module.exports = class BiggerStreamPreview {
         this.openMediaModal = Webpack.getModule(Filters.byStrings("hasMediaOptions", "shouldHideMediaOptions"), { searchExports: true });
 
         if (!this.StreamingStore || !this.PreviewStore) {
-            UI.showToast("BiggerStreamPreview: Stream-Stores nicht gefunden", { type: "error" });
+            UI.showToast("BiggerStreamPreview: stream stores not found", { type: "error" });
             return;
         }
         this.unpatches.push(ContextMenu.patch("user-context", (t, { user }) => user && this.addItem(t, user.id)));
@@ -249,15 +249,15 @@ module.exports = class BiggerStreamPreview {
 
     async view({ guildId, channelId, ownerId }) {
         const url = await this.PreviewStore.getPreviewURL(guildId, channelId, ownerId);
-        if (!url) return UI.showToast("Keine Vorschau verfügbar.", { type: "warning" });
+        if (!url) return UI.showToast("No preview available.", { type: "warning" });
         try {
             if (!this.openMediaModal) throw new Error("openMediaModal missing");
             this.openMediaModal({ items: [{ type: "IMAGE", url, original: url, width: 1280, height: 720 }] });
         } catch (e) {
             Logger.warn("Fallback modal", e);
-            UI.showConfirmationModal("Stream-Vorschau",
+            UI.showConfirmationModal("Stream preview",
                 React.createElement("img", { src: url, style: { width: "100%", borderRadius: 8 } }),
-                { confirmText: "Schließen", cancelText: null });
+                { confirmText: "Close", cancelText: null });
         }
     }
 
@@ -266,7 +266,7 @@ module.exports = class BiggerStreamPreview {
         if (!stream) return;
         const items = [
             ContextMenu.buildItem({ type: "separator" }),
-            ContextMenu.buildItem({ id: "view-stream-preview", label: "Stream-Vorschau ansehen", action: () => this.view(stream) })
+            ContextMenu.buildItem({ id: "view-stream-preview", label: "View stream preview", action: () => this.view(stream) })
         ];
         const c = tree?.props?.children;
         if (Array.isArray(c)) c.push(...items);

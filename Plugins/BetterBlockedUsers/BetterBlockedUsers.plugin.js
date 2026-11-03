@@ -2,12 +2,12 @@
  * @name BetterBlockedUsers
  * @author Equicord-Team · BD-Port (Teil-Port)
  * @version 1.0.3
- * @description Überspringt die „Profil trotzdem anzeigen?“-Abfrage bei blockierten Usern und bietet eine durchsuchbare Blockliste mit Profil-Knopf (Plugin-Einstellungen oder Rechtsklick aufs Zahnrad unten links). Teil-Port des Equicord-Plugins.
+ * @description Skips the "view profile anyway?" prompt for blocked users and adds a searchable blocked-user list with a profile button (plugin settings, or right-click the settings cog bottom-left). Partial port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/betterBlockedUsers
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/BetterBlockedUsers/BetterBlockedUsers.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Equicord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Equicord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -258,25 +258,25 @@ module.exports = class BetterBlockedUsers {
         this.SelectedChannelStore = Webpack.getStore("SelectedChannelStore");
         this.openProfileModal = Webpack.getModule(Filters.byStrings('type:"USER_PROFILE_MODAL_OPEN"'), { searchExports: true });
 
-        // Hook, der entscheidet, ob die Blockiert/Ignoriert-Abfrage gezeigt wird → [zeigen, verwerfen]
+        // Hook that decides whether the blocked/ignored prompt is shown → [show, dismiss]
         const [mod, key] = Webpack.getWithKey(m => typeof m === "function" && (() => {
             const src = String(m);
             return src.includes("isBlocked:") && src.includes("isIgnored:") && src.includes(".useSetting()") && src.includes("useCallback");
         })()) ?? [];
         if (mod) {
-            Logger.info("Abfrage-Hook gefunden");
+            Logger.info("Prompt hook found");
             Patcher.after(mod, key, (_, [userId], ret) => {
                 if (!this.s.skipPrompt || !Array.isArray(ret) || !ret[0]) return;
                 if (this.RelationshipStore.isBlocked(userId) && !this.RelationshipStore.isIgnored?.(userId)) ret[0] = false;
             });
-        } else Logger.warn("Blockiert-Abfrage-Hook nicht gefunden – Überspringen inaktiv");
+        } else Logger.warn("Blocked-prompt hook not found – skipping disabled");
 
         const cogPatch = tree => {
-            const item = ContextMenu.buildItem({ id: "bd-bbu-open", label: "Blockierte User durchsuchen", action: () => this.openModal() });
+            const item = ContextMenu.buildItem({ id: "bd-bbu-open", label: "Search blocked users", action: () => this.openModal() });
             const c = tree?.props?.children;
             if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
         };
-        // Zahnrad unten links: aktuell "settings-menu", früher "user-settings-cog"
+        // Settings cog bottom-left: currently "settings-menu", formerly "user-settings-cog"
         for (const nav of ["settings-menu", "user-settings-cog"]) this.unpatches.push(ContextMenu.patch(nav, cogPatch));
     }
 
@@ -292,7 +292,7 @@ module.exports = class BetterBlockedUsers {
     }
 
     openProfile(userId) {
-        if (!this.openProfileModal) return UI.showToast("Profil-Funktion nicht gefunden", { type: "error" });
+        if (!this.openProfileModal) return UI.showToast("Profile function not found", { type: "error" });
         this.openProfileModal({
             userId, guildId: this.SelectedGuildStore.getGuildId(), channelId: this.SelectedChannelStore.getChannelId(),
             sourceAnalyticsLocations: ["username", "user profile popout"]
@@ -308,24 +308,24 @@ module.exports = class BetterBlockedUsers {
                 .filter(({ id, user }) => !s || id === s || user?.username?.toLowerCase().includes(s) || (user?.globalName ?? user?.global_name)?.toLowerCase().includes(s));
         }, [q, ids]);
         return React.createElement("div", { className: "bd-bbu-wrap" },
-            React.createElement("input", { className: "bd-bbu-search", placeholder: "Name, Anzeigename oder ID …", value: q, autoFocus: true, onChange: e => setQ(e.target.value) }),
-            React.createElement("div", { className: "bd-bbu-count" }, `${rows.length} von ${ids.length} blockierten Usern`),
+            React.createElement("input", { className: "bd-bbu-search", placeholder: "Username, display name or ID …", value: q, autoFocus: true, onChange: e => setQ(e.target.value) }),
+            React.createElement("div", { className: "bd-bbu-count" }, `${rows.length} of ${ids.length} blocked users`),
             React.createElement("div", { className: "bd-bbu-list" }, rows.map(({ id, user }) =>
                 React.createElement("div", { className: "bd-bbu-row", key: id },
                     React.createElement("img", { src: user?.getAvatarURL?.(null, 32) ?? "https://cdn.discordapp.com/embed/avatars/0.png" }),
                     React.createElement("div", { className: "bd-bbu-name" },
-                        user ? (user.globalName ?? user.global_name ?? user.username) : "Unbekannter User",
+                        user ? (user.globalName ?? user.global_name ?? user.username) : "Unknown user",
                         React.createElement("small", null, user ? `@${user.username} · ${id}` : id)),
-                    React.createElement("button", { className: "bd-bbu-btn", onClick: () => plugin.openProfile(id) }, "Profil anzeigen")))));
+                    React.createElement("button", { className: "bd-bbu-btn", onClick: () => plugin.openProfile(id) }, "View profile")))));
     };
 
     openModal() {
-        UI.showConfirmationModal("Blockierte User", React.createElement(this.List, { plugin: this }), { confirmText: "Schließen", cancelText: null });
+        UI.showConfirmationModal("Blocked users", React.createElement(this.List, { plugin: this }), { confirmText: "Close", cancelText: null });
     }
 
     getSettingsPanel() {
         const panel = UI.buildSettingsPanel({
-            settings: [{ type: "switch", id: "skipPrompt", name: "Abfrage bei blockierten Profilen überspringen", note: "Ignorierte User fragen weiterhin nach", value: this.s.skipPrompt }],
+            settings: [{ type: "switch", id: "skipPrompt", name: "Skip the prompt on blocked profiles", note: "Ignored users still show the prompt", value: this.s.skipPrompt }],
             onChange: (_c, id, v) => Data.save("settings", { ...this.s, [id]: v })
         });
         return React.createElement("div", null, panel, React.createElement("div", { style: { marginTop: 16 } }, React.createElement(this.List, { plugin: this })));

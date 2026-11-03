@@ -2,12 +2,12 @@
  * @name FullUserInChatbox
  * @author sadan (Vencord) · BD-Port
  * @version 1.0.1
- * @description Macht @-Erwähnungen im Chat-Eingabefeld zu vollwertigen Mentions (Linksklick = Profil, Rechtsklick = Kontextmenü). Port des Vencord-Plugins.
+ * @description Turns @mentions in the message box into full mentions (left-click = profile, right-click = context menu). Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/fullUserInChatbox
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/FullUserInChatbox/FullUserInChatbox.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — basiert auf Vencord-Code */
+/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
 "use strict";
 
 //#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
@@ -231,18 +231,18 @@ module.exports = class FullUserInChatbox {
         this.__updater = new UpdateManager("FullUserInChatbox", BdApi.Plugins.get("FullUserInChatbox")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         this.UserStore = Webpack.getStore("UserStore");
-        // Die echte Mention-Komponente aus Nachrichten
+        // The real mention component used in messages
         this.Mention = Webpack.getModule(Filters.byStrings(".USER_MENTION)", "inlinePreview"), { searchExports: true });
-        // Slate-Editor-Klasse des Chat-Eingabefelds (renderElement mit "userMention")
+        // Slate editor class of the message box (renderElement with "userMention")
         this.Editor = Webpack.getModule(m => m?.prototype?.renderElement && m.prototype.renderLeaf && String(m.prototype.renderElement).includes("userMention"), { searchExports: true });
 
         if (!this.Mention || !this.Editor) {
-            UI.showToast("FullUserInChatbox: Module nicht gefunden", { type: "error" });
+            UI.showToast("FullUserInChatbox: modules not found", { type: "error" });
             return Logger.error("Missing", { Mention: !!this.Mention, Editor: !!this.Editor });
         }
 
         const self = this;
-        // Wrapper: echte Mention, wenn der User bekannt ist, sonst Original
+        // Wrapper: real mention if the user is known, otherwise the original
         this.Wrapper = function BDFullUserMention({ __orig, ...props }) {
             const user = Hooks.useStateFromStores([self.UserStore], () => self.UserStore.getUser(props.id));
             if (user == null) return React.createElement(__orig, props);
@@ -261,7 +261,7 @@ module.exports = class FullUserInChatbox {
                 }
             } catch (e) { Logger.error(e); }
         });
-        UI.showToast("FullUserInChatbox aktiv – wirkt nach Kanalwechsel", { type: "info" });
+        UI.showToast("FullUserInChatbox active – takes effect after switching channels", { type: "info" });
     }
 
     isUserMentionType(fn) {
