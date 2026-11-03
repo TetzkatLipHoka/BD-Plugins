@@ -1,5 +1,8 @@
 # MoreQuickReactions Changelog
 
+### 1.0.5
+- Fixed a performance issue caused by an expensive :has() CSS selector (thanks Pharaoh2k)
+
 ### 1.0.4
 - Added auto-updater with changelog (UpdateManager by Pharaoh2k)
 - Translated all UI texts, settings and descriptions to English

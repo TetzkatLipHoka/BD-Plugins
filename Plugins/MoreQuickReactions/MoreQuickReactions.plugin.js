@@ -1,16 +1,16 @@
 /**
  * @name MoreQuickReactions
  * @author Equicord/Vencord-Team · BD-Port (vereinfacht)
- * @version 1.0.4
+ * @version 1.0.5
  * @description More quick reactions at the top of the message context menu (instead of a fixed 4), in multiple rows, optionally from your frequently used emojis instead of favorites. Simplified port of the Vencord plugin (no scrolling, hover bar unchanged).
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/moreQuickReactions
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/MoreQuickReactions/MoreQuickReactions.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
+/* SPDX-License-Identifier: GPL-3.0-or-later - based on Vencord code */
 "use strict";
 
-//#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
+//#region Updater - UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
 const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class UpdateManager {
     /* using Net, UI, Logger, Data, Plugins, Utils from BdApi */
     constructor(pluginName, version, github) {
@@ -312,7 +312,7 @@ module.exports = class MoreQuickReactions {
 [role="group"]:has(> [id^="message-quickreact-"]) {
   display: grid !important; grid-template-columns: repeat(${cols}, 1fr); gap: 2px; justify-items: center;
 }
-[role="group"]:has(> [id^="message-quickreact-"]) > [id^="message-quickreact-"] { margin: 0 !important; }
+[id^="message-quickreact-"] { margin: 0 !important; }
 `);
     }
 
