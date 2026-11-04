@@ -1,5 +1,8 @@
 # MoreQuickReactions Changelog
 
+### 1.0.6
+- Fixed the update notification staying stuck on screen after clicking Update, Dismiss or its close button, working around a BetterDiscord bug (fix by Pharaoh2k)
+
 ### 1.0.5
 - Fixed a performance issue caused by an expensive :has() CSS selector (thanks Pharaoh2k)
 

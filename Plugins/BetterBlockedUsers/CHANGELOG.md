@@ -1,5 +1,8 @@
 # BetterBlockedUsers Changelog
 
+### 1.0.4
+- Fixed the update notification staying stuck on screen after clicking Update, Dismiss or its close button, working around a BetterDiscord bug (fix by Pharaoh2k)
+
 ### 1.0.3
 - Added auto-updater with changelog (UpdateManager by Pharaoh2k)
 - Translated all UI texts, settings and descriptions to English

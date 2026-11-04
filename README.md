@@ -91,6 +91,7 @@ Plugins/
   <PluginName>/
     <PluginName>.plugin.js   ← the plugin (this exact path is what the updater fetches)
     CHANGELOG.md             ← "### x.y.z" headings + "- item" lines, shown after updates
+    README.md                ← features, usage and settings of the plugin
 LICENSE                      ← GPL-3.0
 THIRD_PARTY_NOTICES.md       ← UpdateManager permission notice
 ```
