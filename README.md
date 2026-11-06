@@ -1,12 +1,12 @@
 # Equicord → BetterDiscord Ports
 
-![plugins](https://img.shields.io/badge/plugins-18-5865F2) ![BetterDiscord](https://img.shields.io/badge/BetterDiscord-1.14.4-3E82E5) ![license](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)
+![plugins](https://img.shields.io/badge/plugins-18-5865F2) ![BetterDiscord](https://img.shields.io/badge/BetterDiscord-1.14.5-3E82E5) ![license](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)
 
 A collection of **18 plugins** ported from [Equicord](https://github.com/Equicord/Equicord) / [Vencord](https://github.com/Vendicated/Vencord) to [BetterDiscord](https://betterdiscord.app).
 
 Every plugin is a single self-contained `.plugin.js` file: no ZeresPluginLibrary, no BDFDB, no other dependencies. Every plugin also **updates itself** from this repository.
 
-> Tested on **BetterDiscord 1.14.4**, Discord Stable **1.0.9266** (Chrome 152 / Electron 44), Windows, November 2026.
+> Tested on **BetterDiscord 1.14.5**, Discord Stable **1.0.9267** (Chrome 152 / Electron 44), Windows, November 2026.
 > Discord changes its internals all the time, so a client update can break individual plugins.
 
 ---
