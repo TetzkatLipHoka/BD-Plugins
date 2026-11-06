@@ -1,16 +1,16 @@
 /**
  * @name MessageLatency
  * @author arHSM (Vencord) · BD-Port
- * @version 1.0.2
+ * @version 1.0.3
  * @description Shows an indicator on messages that took ≥ n seconds to send (or whose sender's clock is off). Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/messageLatency
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/MessageLatency/MessageLatency.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
+/* SPDX-License-Identifier: GPL-3.0-or-later - based on Vencord code */
 "use strict";
 
-//#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
+//#region Updater - UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
 const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class UpdateManager {
     /* using Net, UI, Logger, Data, Plugins, Utils from BdApi */
     constructor(pluginName, version, github) {
@@ -260,12 +260,16 @@ module.exports = class MessageLatency {
         this.__updater = new UpdateManager("MessageLatency", BdApi.Plugins.get("MessageLatency")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         this.UserStore = Webpack.getStore("UserStore");
-        // Message header (memo), contains GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY = AeYyL+
-        this.Header = Webpack.getModule(m => m?.type && String(m.type).includes("AeYyL+") && String(m.type).includes("usernameSpanId"), { searchExports: true });
-        if (!this.Header) {
-            UI.showToast("MessageLatency: message header not found", { type: "error" });
-            return Logger.error("Header not found");
-        }
+        this.controller = new AbortController();
+        // Message header (memo), contains GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY = AeYyL+.
+        // Discord loads it with the chat, so wait for it instead of failing when Discord opens on another page.
+        Webpack.waitForModule(m => m?.type && String(m.type).includes("AeYyL+") && String(m.type).includes("usernameSpanId"), { searchExports: true, signal: this.controller.signal })
+            .then(Header => { if (Header && !this.controller.signal.aborted) this.patchHeader(Header); })
+            .catch(err => Logger.error(err));
+    }
+
+    patchHeader(Header) {
+        this.Header = Header;
         const self = this;
         this.Indicator = function LatencyIndicator({ message }) {
             const d = self.data(message);
@@ -288,7 +292,7 @@ module.exports = class MessageLatency {
     }
 
     stop() {
-        this.__updater?.stop(); Patcher.unpatchAll(); }
+        this.controller?.abort(); this.__updater?.stop(); Patcher.unpatchAll(); }
 
     data(message) {
         const { latency, detectDiscordKotlin, showMillis, ignoreSelf } = this.settings;

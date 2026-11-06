@@ -1,7 +1,7 @@
 /**
  * @name BiggerStreamPreview
  * @author phil (Vencord) · BD-Port
- * @version 1.0.2
+ * @version 1.0.3
  * @description Right-click a streaming user or a stream → "View stream preview" in a large modal. Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/biggerStreamPreview
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("BiggerStreamPreview"));
 //#endregion Updater
 
-const { ContextMenu, Webpack, UI, React, Logger } = new BdApi("BiggerStreamPreview");
+const { ContextMenu, Webpack, UI, React, Logger, Utils } = new BdApi("BiggerStreamPreview");
 const { Filters } = Webpack;
 
 module.exports = class BiggerStreamPreview {
@@ -276,8 +276,9 @@ module.exports = class BiggerStreamPreview {
             ContextMenu.buildItem({ type: "separator" }),
             ContextMenu.buildItem({ id: "view-stream-preview", label: "View stream preview", action: () => this.view(stream) })
         ];
-        const c = tree?.props?.children;
+        const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+        const c = menu?.props?.children;
         if (Array.isArray(c)) c.push(...items);
-        else if (tree?.props) tree.props.children = [c, ...items];
+        else if (menu?.props) menu.props.children = [c, ...items];
     }
 };

@@ -41,7 +41,7 @@ Under **User Settings → BetterDiscord → Plugins → MessageLatency** (cog ic
 
 ## Troubleshooting
 
-Discord changes its internals all the time, so a client update can break this plugin. An error toast when it starts is usually the first sign. See [Reporting problems](../../README.md#reporting-problems).
+Discord changes its internals all the time, so a client update can break this plugin. It waits for the Discord code it needs, so it then simply has no effect, without an error toast. See [Reporting problems](../../README.md#reporting-problems).
 
 ## Credits & license
 

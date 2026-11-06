@@ -1,7 +1,7 @@
 /**
  * @name BetterSessions
  * @author amia (Vencord) · BD-Port (vereinfacht)
- * @version 1.0.3
+ * @version 1.0.4
  * @description Checks for new logins (devices/sessions) in the background and notifies you. Own overview with exact timestamps and custom names per session (right-click the settings cog bottom-left → "Sessions"). Simplified port of the Vencord plugin (own window instead of modifying the Devices page).
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/betterSessions
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("BetterSessions"));
 //#endregion Updater
 
-const { Webpack, ContextMenu, React, DOM, Data, UI, Logger } = new BdApi("BetterSessions");
+const { Webpack, ContextMenu, React, DOM, Data, UI, Logger, Utils } = new BdApi("BetterSessions");
 const { useState, useEffect } = React;
 
 const DEFAULTS = { backgroundCheck: true, checkInterval: 20 };
@@ -272,8 +272,9 @@ module.exports = class BetterSessions {
 
         const cogPatch = tree => {
             const item = ContextMenu.buildItem({ id: "bd-bs-open", label: "Sessions", action: () => this.openModal() });
-            const c = tree?.props?.children;
-            if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
+            const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+            const c = menu?.props?.children;
+            if (Array.isArray(c)) c.push(item); else if (menu?.props) menu.props.children = [c, item];
         };
         // Settings cog bottom-left: currently "settings-menu", formerly "user-settings-cog"
         for (const nav of ["settings-menu", "user-settings-cog"]) this.unpatches.push(ContextMenu.patch(nav, cogPatch));

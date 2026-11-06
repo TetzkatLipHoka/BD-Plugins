@@ -1,7 +1,7 @@
 /**
  * @name VoiceChatUtilities
  * @author D3SOX, nickwoah (Equicord) · BD-Port
- * @version 1.0.2
+ * @version 1.0.3
  * @description Actions for a whole voice channel via right-click: mention, disconnect, (un)mute, (un)deafen or move everyone. Port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/voiceChatUtils
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("VoiceChatUtilities"));
 //#endregion Updater
 
-const { ContextMenu, Webpack, Data, UI, Logger } = new BdApi("VoiceChatUtilities");
+const { ContextMenu, Webpack, Data, UI, Logger, Utils } = new BdApi("VoiceChatUtilities");
 const { Filters } = Webpack;
 
 const DEFAULTS = { waitAfter: 5, waitSeconds: 2 };
@@ -310,9 +310,10 @@ module.exports = class VoiceChatUtilities {
             ]
         });
 
-        const children = tree?.props?.children;
+        const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+        const children = menu?.props?.children;
         if (Array.isArray(children)) children.splice(-1, 0, item);
-        else if (tree?.props) tree.props.children = [children, item];
+        else if (menu?.props) menu.props.children = [children, item];
     }
 
     getSettingsPanel() {

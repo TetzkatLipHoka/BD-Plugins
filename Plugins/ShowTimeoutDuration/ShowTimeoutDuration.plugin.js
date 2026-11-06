@@ -1,16 +1,16 @@
 /**
  * @name ShowTimeoutDuration
  * @author Ven, Sqaaakoi (Vencord) · BD-Port
- * @version 1.0.2
- * @description Shows how much longer a user's timeout lasts – in the tooltip or right next to the timeout icon. Port of the Vencord plugin.
+ * @version 1.0.3
+ * @description Shows how much longer a user's timeout lasts - in the tooltip or right next to the timeout icon. Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/showTimeoutDuration
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/ShowTimeoutDuration/ShowTimeoutDuration.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
+/* SPDX-License-Identifier: GPL-3.0-or-later - based on Vencord code */
 "use strict";
 
-//#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
+//#region Updater - UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
 const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class UpdateManager {
     /* using Net, UI, Logger, Data, Plugins, Utils from BdApi */
     constructor(pluginName, version, github) {
@@ -256,12 +256,15 @@ module.exports = class ShowTimeoutDuration {
         DOM.addStyle(CSS);
         this.ChannelStore = Webpack.getStore("ChannelStore");
         this.GuildMemberStore = Webpack.getStore("GuildMemberStore");
-        this.Header = Webpack.getModule(m => m?.type && String(m.type).includes("AeYyL+") && String(m.type).includes("usernameSpanId"), { searchExports: true });
-        if (!this.Header) {
-            UI.showToast("ShowTimeoutDuration: message header not found", { type: "error" });
-            return Logger.error("Header not found");
-        }
+        this.controller = new AbortController();
+        // Discord loads the message header with the chat, so wait for it instead of failing when Discord opens on another page
+        Webpack.waitForModule(m => m?.type && String(m.type).includes("AeYyL+") && String(m.type).includes("usernameSpanId"), { searchExports: true, signal: this.controller.signal })
+            .then(Header => { if (Header && !this.controller.signal.aborted) this.patchHeader(Header); })
+            .catch(err => Logger.error(err));
+    }
 
+    patchHeader(Header) {
+        this.Header = Header;
         Patcher.after(this.Header, "type", (_, [props], ret) => {
             try {
                 const message = props?.message;
@@ -287,7 +290,7 @@ module.exports = class ShowTimeoutDuration {
     }
 
     stop() {
-        this.__updater?.stop(); Patcher.unpatchAll(); DOM.removeStyle(); }
+        this.controller?.abort(); this.__updater?.stop(); Patcher.unpatchAll(); DOM.removeStyle(); }
 
     getSettingsPanel() {
         return UI.buildSettingsPanel({

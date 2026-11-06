@@ -1,7 +1,7 @@
 /**
  * @name JumpTo
  * @author Samwich, thororen (Equicord) · BD-Port
- * @version 1.0.2
+ * @version 1.0.3
  * @description Context menu: jump to the first/last message of a channel/DM, or to a user's first/last message in the channel. Port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/jumpTo
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("JumpTo"));
 //#endregion Updater
 
-const { ContextMenu, Webpack, UI, Logger } = new BdApi("JumpTo");
+const { ContextMenu, Webpack, UI, Logger, Utils } = new BdApi("JumpTo");
 const { Filters } = Webpack;
 
 module.exports = class JumpTo {
@@ -263,9 +263,10 @@ module.exports = class JumpTo {
 
     push(tree, items) {
         const built = items.map(i => ContextMenu.buildItem(i));
-        const c = tree?.props?.children;
+        const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+        const c = menu?.props?.children;
         if (Array.isArray(c)) c.push(...built);
-        else if (tree?.props) tree.props.children = [c, ...built];
+        else if (menu?.props) menu.props.children = [c, ...built];
     }
 
     jumpFirst(channelId, guildId) { this.transitionTo(`/channels/${guildId ?? "@me"}/${channelId}/0`); }

@@ -1,7 +1,7 @@
 /**
  * @name ExportMessages
  * @author veygax, dat_insanity (Equicord) · BD-Port
- * @version 1.0.2
+ * @version 1.0.3
  * @description Right-click a message → export it as .txt. Plugin settings: copy your contact list (friends, blocked, requests) to the clipboard as JSON. Port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/exportMessages
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("ExportMessages"));
 //#endregion Updater
 
-const { ContextMenu, Webpack, Data, UI, React, Logger } = new BdApi("ExportMessages");
+const { ContextMenu, Webpack, Data, UI, React, Logger, Utils } = new BdApi("ExportMessages");
 
 const DEFAULTS = { openFileAfterExport: true };
 
@@ -273,8 +273,9 @@ module.exports = class ExportMessages {
         this.unpatches.push(ContextMenu.patch("message", (tree, { message }) => {
             if (!message) return;
             const item = ContextMenu.buildItem({ id: "bd-export-message", label: "Export message", action: () => this.exportMessage(message) });
-            const c = tree?.props?.children;
-            if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
+            const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+            const c = menu?.props?.children;
+            if (Array.isArray(c)) c.push(item); else if (menu?.props) menu.props.children = [c, item];
         }));
     }
 

@@ -1,7 +1,7 @@
 /**
  * @name ImplicitRelationships
  * @author Dolfies (Vencord) · BD-Port (vereinfacht)
- * @version 1.0.3
+ * @version 1.0.4
  * @description Shows your "implicit relationships": people Discord thinks you interact with a lot who aren't on your friends list, ranked by affinity. Open via right-click on the settings cog bottom-left, or in the plugin settings. Simplified port of the Vencord plugin (own window instead of a friends-list tab).
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/implicitRelationships
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("ImplicitRelationships"));
 //#endregion Updater
 
-const { Webpack, ContextMenu, React, DOM, UI, Logger } = new BdApi("ImplicitRelationships");
+const { Webpack, ContextMenu, React, DOM, UI, Logger, Utils } = new BdApi("ImplicitRelationships");
 const { Filters } = Webpack;
 const { useState, useMemo } = React;
 
@@ -271,8 +271,9 @@ module.exports = class ImplicitRelationships {
         }
         const cogPatch = tree => {
             const item = ContextMenu.buildItem({ id: "bd-ir-open", label: "Implicit relationships", action: () => this.openModal() });
-            const c = tree?.props?.children;
-            if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
+            const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+            const c = menu?.props?.children;
+            if (Array.isArray(c)) c.push(item); else if (menu?.props) menu.props.children = [c, item];
         };
         // Settings cog bottom-left: currently "settings-menu", formerly "user-settings-cog"
         for (const nav of ["settings-menu", "user-settings-cog"]) this.unpatches.push(ContextMenu.patch(nav, cogPatch));

@@ -1,7 +1,7 @@
 /**
  * @name GitHubRepos
  * @author talhakf, Panniku, benjii (Equicord) · BD-Port (vereinfacht)
- * @version 1.0.2
+ * @version 1.0.3
  * @description Right-click a user with a linked GitHub account → "GitHub repositories" shows their public repos (sorted by stars, with language and description). Simplified port of the Equicord plugin (window instead of profile tab).
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/githubRepos
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("GitHubRepos"));
 //#endregion Updater
 
-const { Webpack, ContextMenu, React, DOM, Data, UI, Logger } = new BdApi("GitHubRepos");
+const { Webpack, ContextMenu, React, DOM, Data, UI, Logger, Utils } = new BdApi("GitHubRepos");
 const { useState, useEffect, useMemo } = React;
 
 const DEFAULTS = { perPage: 30, hideForks: false };
@@ -282,8 +282,9 @@ module.exports = class GitHubRepos {
             const acc = ghAccount(this.UserProfileStore.getUserProfile(user.id));
             if (!acc) return;
             const item = ContextMenu.buildItem({ id: "bd-gh-repos", label: "GitHub repositories", action: () => this.openModal(user, acc) });
-            const c = tree?.props?.children;
-            if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
+            const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+            const c = menu?.props?.children;
+            if (Array.isArray(c)) c.push(item); else if (menu?.props) menu.props.children = [c, item];
         }));
     }
 

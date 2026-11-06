@@ -1,16 +1,16 @@
 /**
  * @name FullSearchContext
  * @author Ven, Aria (Vencord) · BD-Port
- * @version 1.0.2
+ * @version 1.0.3
  * @description Right-clicking search results opens the full message context menu (reply, copy, reactions, other plugins …) including "Copy author ID". Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/fullSearchContext
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/FullSearchContext/FullSearchContext.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
+/* SPDX-License-Identifier: GPL-3.0-or-later - based on Vencord code */
 "use strict";
 
-//#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
+//#region Updater - UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
 const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class UpdateManager {
     /* using Net, UI, Logger, Data, Plugins, Utils from BdApi */
     constructor(pluginName, version, github) {
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("FullSearchContext"));
 //#endregion Updater
 
-const { Webpack, ContextMenu, ReactUtils, React, UI, Logger } = new BdApi("FullSearchContext");
+const { Webpack, ContextMenu, ReactUtils, React, UI, Logger, Utils } = new BdApi("FullSearchContext");
 
 module.exports = class FullSearchContext {
     constructor() { this.unpatches = []; }
@@ -240,14 +240,17 @@ module.exports = class FullSearchContext {
         this.__updater = new UpdateManager("FullSearchContext", BdApi.Plugins.get("FullSearchContext")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         this.ChannelStore = Webpack.getStore("ChannelStore");
-        // Regular message context menu (navId "message"), module containing ".MESSAGE,commandTargetId:"
-        this.MessageMenu = Webpack.getModule(m => typeof m?.default === "function" && typeof m.c === "function"
-            && String(m.c).includes(".MESSAGE,commandTargetId:"), { defaultExport: false })?.default;
-        if (!this.MessageMenu) {
-            UI.showToast("FullSearchContext: message menu not found", { type: "error" });
-            return Logger.error("MessageMenu not found");
-        }
+        this.controller = new AbortController();
+        // Regular message context menu (navId "message"), module containing ".MESSAGE,commandTargetId:".
+        // Discord loads it with the chat, so wait for it instead of failing when Discord opens on another page.
+        Webpack.waitForModule(m => typeof m?.default === "function" && typeof m.c === "function"
+            && String(m.c).includes(".MESSAGE,commandTargetId:"), { defaultExport: false, signal: this.controller.signal })
+            .then(mod => { if (mod?.default && !this.controller.signal.aborted) this.setup(mod.default); })
+            .catch(err => Logger.error(err));
+    }
 
+    setup(MessageMenu) {
+        this.MessageMenu = MessageMenu;
         this.onContext = e => this.handle(e);
         document.addEventListener("contextmenu", this.onContext, true);
 
@@ -255,12 +258,14 @@ module.exports = class FullSearchContext {
         this.unpatches.push(ContextMenu.patch("message", (tree, props) => {
             if (!props?.__bdFullSearch || !props.message?.author) return;
             const item = ContextMenu.buildItem({ id: "bd-copy-author-id", label: "Copy author ID", action: () => this.copy(props.message.author.id) });
-            const c = tree?.props?.children;
-            if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
+            const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+            const c = menu?.props?.children;
+            if (Array.isArray(c)) c.push(item); else if (menu?.props) menu.props.children = [c, item];
         }));
     }
 
     stop() {
+        this.controller?.abort();
         this.__updater?.stop();
         if (this.onContext) document.removeEventListener("contextmenu", this.onContext, true);
         this.unpatches.forEach(u => u()); this.unpatches = [];

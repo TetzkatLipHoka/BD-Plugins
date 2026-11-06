@@ -1,5 +1,8 @@
 # GitHubRepos Changelog
 
+### 1.0.3
+- Fixed context menu entries no longer appearing after a Discord update
+
 ### 1.0.2
 - Fixed the update notification staying stuck on screen after clicking Update, Dismiss or its close button, working around a BetterDiscord bug (fix by Pharaoh2k)
 

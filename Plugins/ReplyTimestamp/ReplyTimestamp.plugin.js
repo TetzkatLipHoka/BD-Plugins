@@ -1,16 +1,16 @@
 /**
  * @name ReplyTimestamp
  * @author Kyuuhachi (Vencord) · BD-Port
- * @version 1.0.2
+ * @version 1.0.3
  * @description Shows a timestamp on reply previews. Port of the Vencord plugin.
  * @source https://github.com/Vendicated/Vencord/tree/main/src/plugins/replyTimestamp
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
  * @updateUrl https://raw.githubusercontent.com/TetzkatLipHoka/BD-Plugins/main/Plugins/ReplyTimestamp/ReplyTimestamp.plugin.js
  */
-/* SPDX-License-Identifier: GPL-3.0-or-later — based on Vencord code */
+/* SPDX-License-Identifier: GPL-3.0-or-later - based on Vencord code */
 "use strict";
 
-//#region Updater — UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
+//#region Updater - UpdateManager © Pharaoh2k, used with permission (see THIRD_PARTY_NOTICES.md)
 const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class UpdateManager {
     /* using Net, UI, Logger, Data, Plugins, Utils from BdApi */
     constructor(pluginName, version, github) {
@@ -266,12 +266,21 @@ module.exports = class ReplyTimestamp {
         this.__updater = new UpdateManager("ReplyTimestamp", BdApi.Plugins.get("ReplyTimestamp")?.version ?? "0.0.0", "TetzkatLipHoka/BD-Plugins");
         this.__updater.start(true);
         DOM.addStyle(CSS);
-        // Component with the "message could not be loaded" text (REPLY_QUOTE_MESSAGE_NOT_LOADED = 1i+hMi)
-        const [mod, key] = Webpack.getWithKey(Filters.byStrings("1i+hMi", "isReplySpineClickable")) ?? [];
-        if (!mod) {
-            UI.showToast("ReplyTimestamp: reply component not found", { type: "error" });
-            return Logger.error("Reply component not found");
-        }
+        this.controller = new AbortController();
+        // Component with the "message could not be loaded" text (REPLY_QUOTE_MESSAGE_NOT_LOADED = 1i+hMi).
+        // Discord loads it with the chat, so wait for it instead of failing when Discord opens on another page.
+        const filter = Filters.byStrings("1i+hMi", "isReplySpineClickable");
+        Webpack.waitForModule(filter, { searchExports: true, signal: this.controller.signal })
+            .then(found => {
+                if (!found || this.controller.signal.aborted) return;
+                const [mod, key] = Webpack.getWithKey(filter);
+                if (mod) this.patchReply(mod, key);
+                else Logger.error("Reply component not found");
+            })
+            .catch(err => Logger.error(err));
+    }
+
+    patchReply(mod, key) {
         Patcher.after(mod, key, (_, [props], ret) => {
             try {
                 const rm = props?.referencedMessage;
@@ -285,5 +294,5 @@ module.exports = class ReplyTimestamp {
     }
 
     stop() {
-        this.__updater?.stop(); Patcher.unpatchAll(); DOM.removeStyle(); }
+        this.controller?.abort(); this.__updater?.stop(); Patcher.unpatchAll(); DOM.removeStyle(); }
 };

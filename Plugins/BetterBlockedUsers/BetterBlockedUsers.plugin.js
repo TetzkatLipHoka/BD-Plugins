@@ -1,7 +1,7 @@
 /**
  * @name BetterBlockedUsers
  * @author Equicord-Team · BD-Port (Teil-Port)
- * @version 1.0.4
+ * @version 1.0.5
  * @description Skips the "view profile anyway?" prompt for blocked users and adds a searchable blocked-user list with a profile button (plugin settings, or right-click the settings cog bottom-left). Partial port of the Equicord plugin.
  * @source https://github.com/Equicord/Equicord/tree/main/src/equicordplugins/betterBlockedUsers
  * @website https://github.com/TetzkatLipHoka/BD-Plugins
@@ -231,7 +231,7 @@ const UpdateManager = (({ Net, UI, Logger, Data, Plugins, Utils }) => class Upda
 })(new BdApi("BetterBlockedUsers"));
 //#endregion Updater
 
-const { Webpack, Patcher, ContextMenu, React, DOM, Data, UI, Logger } = new BdApi("BetterBlockedUsers");
+const { Webpack, Patcher, ContextMenu, React, DOM, Data, UI, Logger, Utils } = new BdApi("BetterBlockedUsers");
 const { Filters } = Webpack;
 const { useState, useMemo } = React;
 
@@ -281,8 +281,9 @@ module.exports = class BetterBlockedUsers {
 
         const cogPatch = tree => {
             const item = ContextMenu.buildItem({ id: "bd-bbu-open", label: "Search blocked users", action: () => this.openModal() });
-            const c = tree?.props?.children;
-            if (Array.isArray(c)) c.push(item); else if (tree?.props) tree.props.children = [c, item];
+            const menu = Utils.findInTree(tree, n => n?.props?.navId, { walkable: ["props", "children"] }) ?? tree;
+            const c = menu?.props?.children;
+            if (Array.isArray(c)) c.push(item); else if (menu?.props) menu.props.children = [c, item];
         };
         // Settings cog bottom-left: currently "settings-menu", formerly "user-settings-cog"
         for (const nav of ["settings-menu", "user-settings-cog"]) this.unpatches.push(ContextMenu.patch(nav, cogPatch));

@@ -143,7 +143,7 @@ Open an issue with:
 - your BetterDiscord version (*Settings → BetterDiscord → Updater → Core*),
 - the console output (`Ctrl+Shift+I`, filter by the plugin name).
 
-Each plugin logs a toast and a console error if it can't find the Discord module it needs, which is usually the first sign that a Discord update changed something.
+Most plugins show a toast and log a console error if they can't find the Discord module they need, which is usually the first sign that a Discord update changed something. FullSearchContext, MessageLatency, ReplyTimestamp and ShowTimeoutDuration wait for their module instead, because Discord only loads it with the chat, so if it's gone they simply have no effect.
 
 ---
 

@@ -1,5 +1,9 @@
 # FullSearchContext Changelog
 
+### 1.0.3
+- Fixed context menu entries no longer appearing after a Discord update
+- Fixed the plugin failing to start when Discord opens on a page other than a chat (fix by Pharaoh2k)
+
 ### 1.0.2
 - Fixed the update notification staying stuck on screen after clicking Update, Dismiss or its close button, working around a BetterDiscord bug (fix by Pharaoh2k)
 
